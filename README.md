@@ -22,6 +22,9 @@ Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – 
   Titulky jsou pak uvnitř MP4 (mov_text).
   Samsung Dolby Vision neumí: profil 8 dostane beze změny (hraje jako HDR10), u profilu 5
   aplikace upozorní na špatné barvy.
+- V nastavení jde vypnout převod TrueHD/DTS na Dolby Digital (pro TV a přehrávače, které je umí,
+  např. Kodi – zůstane Atmos v TrueHD) a přebalení Dolby Vision do MP4. Obojí je výchozí zapnuté;
+  omezení konkrétních zařízení (Nest Hub, Samsung) platí vždy.
 - Obrázkové titulky z Blu-ray/DVD (PGS) TV přes DLNA neukáže – aplikace na to upozorní.
 - Fronta, pauza, přetáčení (i šipkami), hlasitost (pokud ji TV přes DLNA nabízí), výběr zvuku
   a titulků, „Odeslat do → File2TV“ v Průzkumníku, ikona v oznamovací oblasti. Křížek během
