@@ -17,8 +17,9 @@ Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – 
   vybraný zvuk a titulky dá první a jako výchozí, zvuk DTS/TrueHD/Opus převede na AC3/AAC, Dolby Atmos v eAC3 nechává,
   titulky ležící vedle videa (`Film.srt`, `Film.cs.srt`, kódování CP1250 i UTF-8) vloží.
   Další video ve frontě se připravuje už během přehrávání předchozího.
-- Dolby Vision (profil 5 a 8) jde do TV jako MP4 se záznamem DV (dvcC, značka hvc1) – LG 
-  zapne Dolby Vision jen u MP4, z MKV a TS hraje jen HDR10. Titulky jsou pak uvnitř MP4 (mov_text).
+- Dolby Vision (profil 5 a 8) se před odesláním přes DLNA přebalí do MP4 se záznamem DV
+  (dvcC, značka hvc1) – z MKV a TS televize Dolby Vision často nezapnou a hrají jen HDR10.
+  Titulky jsou pak uvnitř MP4 (mov_text).
   Samsung Dolby Vision neumí: profil 8 dostane beze změny (hraje jako HDR10), u profilu 5
   aplikace upozorní na špatné barvy.
 - Obrázkové titulky z Blu-ray/DVD (PGS) TV přes DLNA neukáže – aplikace na to upozorní.
