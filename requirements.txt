@@ -1,0 +1,7 @@
+aiohttp==3.14.5
+pillow==13.0.0
+PyChromecast==14.0.10
+pystray==0.19.5
+pywebview==6.2.1
+# jen pro sestavení .exe (build.ps1)
+pyinstaller==6.22.3

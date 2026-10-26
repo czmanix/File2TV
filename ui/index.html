@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File2TV</title>
+<style>
+  :root {
+    --bg: #f3f3f3; --card: #ffffff; --card2: #f9f9f9; --text: #1b1b1b; --sub: #616161; --faint: #8a8a8a;
+    --line: rgba(0,0,0,.08); --hover: rgba(0,0,0,.04); --press: rgba(0,0,0,.07);
+    --accent: #0067c0; --accent-text: #ffffff; --accent-soft: rgba(0,103,192,.10);
+    --track: rgba(0,0,0,.14); --danger: #c42b1c; --warn: #9d5d00; --ok: #0f7b0f;
+    --shadow: 0 8px 32px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1c; --card: #2b2b2b; --card2: #323232; --text: #ffffff; --sub: #c5c5c5; --faint: #8f8f8f;
+      --line: rgba(255,255,255,.08); --hover: rgba(255,255,255,.05); --press: rgba(255,255,255,.08);
+      --accent: #4cc2ff; --accent-text: #000000; --accent-soft: rgba(76,194,255,.14);
+      --track: rgba(255,255,255,.18); --danger: #ff99a4; --warn: #fce100; --ok: #6ccb5f;
+      --shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text); font: 14px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    display: flex; flex-direction: column; overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: default; }
+  svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .icon { width: 36px; height: 36px; border-radius: 6px; display: inline-grid; place-items: center; color: var(--text); }
+  .icon:hover { background: var(--hover); } .icon:active { background: var(--press); }
+  .icon:disabled { color: var(--faint); background: none; }
+  .icon.on { color: var(--accent); }
+
+  /* Přehrávač nahoře */
+  header { display: flex; align-items: center; gap: 4px; padding: 10px 10px 6px 10px; }
+  .device { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; text-align: left; }
+  .device:hover { background: var(--hover); } .device:active { background: var(--press); }
+  .device .txt { min-width: 0; flex: 1; }
+  .device .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .device .sub { color: var(--sub); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .device .tv { width: 24px; height: 24px; color: var(--sub); }
+  .device.ok .tv { color: var(--accent); }
+  .chev { width: 16px; height: 16px; color: var(--sub); }
+
+  .popover {
+    position: absolute; z-index: 20; left: 10px; right: 10px; top: 58px; background: var(--card); border-radius: 10px;
+    box-shadow: var(--shadow); padding: 6px; max-height: 60vh; overflow: auto;
+  }
+  .popover .dev { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border-radius: 6px; text-align: left; }
+  .popover .dev:hover { background: var(--hover); }
+  .popover .dev .txt { flex: 1; min-width: 0; }
+  .popover .dev .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .popover .dev .sub { color: var(--sub); font-size: 12px; }
+  .popover .dev.sel { background: var(--accent-soft); }
+  .popover .dev.sel .name { color: var(--accent); font-weight: 600; }
+  .popover .dev.off .name { color: var(--sub); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+  .dot.on { background: var(--ok); }
+  .popover .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 4px 2px 10px; color: var(--sub); font-size: 12px; border-top: 1px solid var(--line); margin-top: 4px; }
+  .small-btn { padding: 4px 10px; border-radius: 5px; background: var(--card2); border: 1px solid var(--line); font-size: 12px; }
+  .small-btn:hover { background: var(--hover); }
+  .popover .empty { padding: 14px 10px; color: var(--sub); }
+
+  .card { background: var(--card); border-radius: 10px; margin: 0 12px; border: 1px solid var(--line); }
+  .now { padding: 16px 16px 10px; }
+  .np-title { font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .np-sub { color: var(--sub); font-size: 12px; min-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: transparent; margin: 0; }
+  input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--accent) var(--p, 0%), var(--track) var(--p, 0%)); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; margin-top: -6px; background: var(--accent); box-shadow: 0 0 0 3px var(--card), 0 1px 4px 3px rgba(0,0,0,.18); transition: transform .1s; }
+  input[type=range]:hover::-webkit-slider-thumb, input[type=range]:active::-webkit-slider-thumb { transform: scale(1.15); }
+  input[type=range]:disabled::-webkit-slider-runnable-track { background: var(--track); }
+  input[type=range]:disabled::-webkit-slider-thumb { visibility: hidden; }
+  .seek { margin-top: 12px; }
+  .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); font-variant-numeric: tabular-nums; margin-top: -2px; }
+
+  .controls { display: grid; grid-template-columns: 1fr auto auto auto 1fr; align-items: center; gap: 14px; margin: 6px 0 4px; }
+  .controls #stop { justify-self: end; margin-right: 6px; }
+  .controls .icon { width: 44px; height: 44px; border-radius: 50%; }
+  .controls .icon svg { width: 22px; height: 22px; }
+  .play { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-text); }
+  .play:hover { filter: brightness(1.08); } .play:active { filter: brightness(.94); }
+  .play:disabled { background: var(--track); color: var(--card); filter: none; }
+  .play svg { width: 26px; height: 26px; fill: currentColor; stroke: none; }
+
+  .volume { display: flex; align-items: center; gap: 6px; padding-top: 4px; }
+  .volume input { flex: 1; }
+  .volume .val { width: 28px; text-align: right; font-size: 12px; color: var(--sub); font-variant-numeric: tabular-nums; }
+
+  .notice { margin: 10px 12px 0; padding: 10px 8px 10px 12px; border-radius: 8px; display: flex; gap: 10px; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--danger); font-size: 13px; }
+  .notice.warning { border-left-color: var(--warn); }
+  .notice.info { border-left-color: var(--accent); }
+  .notice .txt { flex: 1; padding-top: 1px; user-select: text; -webkit-user-select: text; }
+  .notice .act { margin-top: 6px; }
+  .notice .icon { width: 28px; height: 28px; }
+  .notice .icon svg { width: 16px; height: 16px; }
+  .primary { padding: 5px 12px; border-radius: 5px; background: var(--accent); color: var(--accent-text); font-size: 13px; }
+  .primary:hover { filter: brightness(1.08); }
+
+  /* Fronta */
+  .qhead { display: flex; align-items: center; gap: 2px; padding: 14px 10px 4px 18px; }
+  .qhead h2 { flex: 1; font-size: 14px; font-weight: 600; margin: 0; }
+  .list { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; }
+  .item .row { display: flex; align-items: center; gap: 4px; padding: 6px 4px 6px 6px; }
+  .item .meta { flex: 1; min-width: 0; padding: 2px 4px; }
+  .item .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .s { color: var(--sub); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item.current { border-color: var(--accent); }
+  .item.current .t { color: var(--accent); font-weight: 600; }
+  .item.done .t { color: var(--sub); }
+  .item.error .s { color: var(--danger); white-space: normal; }
+  .item .bar { height: 3px; border-radius: 2px; background: var(--track); margin-top: 5px; overflow: hidden; }
+  .item .bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+  .item .more.open svg { transform: rotate(180deg); }
+  .item .tracks { display: none; padding: 2px 12px 12px 48px; gap: 8px; flex-direction: column; }
+  .item.open .tracks { display: flex; }
+  .item .tracks label { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 8px; font-size: 12px; color: var(--sub); }
+  .item .warn { font-size: 12px; color: var(--warn); }
+  select { font: inherit; font-size: 13px; color: var(--text); background: var(--card2); border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; min-width: 0; width: 100%; }
+  select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .eq { display: flex; gap: 2px; align-items: flex-end; height: 14px; }
+  .eq i { width: 3px; background: var(--accent); border-radius: 1px; animation: eq 1s infinite ease-in-out; }
+  .eq i:nth-child(2) { animation-delay: -.4s; } .eq i:nth-child(3) { animation-delay: -.7s; }
+  .paused .eq i { animation-play-state: paused; }
+  @keyframes eq { 0%,100% { height: 4px; } 50% { height: 14px; } }
+
+  .empty { margin: 4px 0; border: 2px dashed var(--track); border-radius: 10px; padding: 34px 20px; text-align: center; color: var(--sub); }
+  .empty svg { width: 40px; height: 40px; color: var(--faint); stroke-width: 1.3; }
+  .empty .big { font-size: 15px; color: var(--text); margin: 8px 0 4px; }
+  .link { color: var(--accent); }
+  .link:hover { text-decoration: underline; }
+
+  #drop { position: fixed; inset: 8px; z-index: 50; border: 2px dashed var(--accent); border-radius: 12px; background: color-mix(in srgb, var(--bg) 88%, transparent);
+    display: none; place-items: center; font-size: 16px; color: var(--accent); pointer-events: none; }
+  body.dragging #drop { display: grid; }
+
+  /* Nastavení */
+  .sheet-bg { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.3); display: grid; place-items: center; }
+  .sheet { width: calc(100% - 32px); max-width: 420px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 18px 14px; }
+  .sheet h3 { margin: 0 0 12px; font-size: 16px; }
+  .opt { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .opt:last-of-type { border-bottom: 0; }
+  .opt .txt { flex: 1; }
+  .opt .sub { color: var(--sub); font-size: 12px; }
+  .opt select { width: auto; max-width: 210px; flex: none; }
+  .opt input[type=text] { width: 110px; font: inherit; font-size: 13px; color: var(--text); background: var(--card2); border: 1px solid var(--line); border-radius: 5px; padding: 4px 8px; }
+  .toggle { width: 40px; height: 20px; border-radius: 10px; border: 1px solid var(--sub); position: relative; flex: none; }
+  .toggle::after { content: ""; position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--sub); top: 3px; left: 4px; transition: left .15s; }
+  .toggle.on { background: var(--accent); border-color: var(--accent); }
+  .toggle.on::after { left: 22px; background: var(--accent-text); }
+  .sheet .actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<svg style="display:none">
+  <symbol id="i-tv" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 5v14M18 6l-9 6 9 6z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M18 5v14M6 6l9 6-9 6z"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-add" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-clear" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></symbol>
+</svg>
+
+
+<header>
+  <button class="device" id="deviceBtn" data-i18n-title="selectTv">
+    <svg class="tv"><use href="#i-tv"/></svg>
+    <div class="txt"><div class="name" id="devName">&nbsp;</div><div class="sub" id="devSub">&nbsp;</div></div>
+    <svg class="chev"><use href="#i-chev"/></svg>
+  </button>
+  <button class="icon" id="settingsBtn" data-i18n-title="settings"><svg><use href="#i-gear"/></svg></button>
+</header>
+<div class="popover hidden" id="devices"></div>
+
+<section class="card now">
+  <div class="np-title" id="npTitle">&nbsp;</div>
+  <div class="np-sub" id="npSub">&nbsp;</div>
+  <div class="seek"><input type="range" id="seek" min="0" max="1000" value="0" disabled></div>
+  <div class="times"><span id="pos">0:00</span><span id="dur">0:00</span></div>
+  <div class="controls">
+    <button class="icon" id="stop" data-i18n-title="stop"><svg><use href="#i-stop"/></svg></button>
+    <button class="icon" id="prev" data-i18n-title="prev"><svg><use href="#i-prev"/></svg></button>
+    <button class="play" id="play" data-i18n-title="playPause"><svg><use id="playIcon" href="#i-play"/></svg></button>
+    <button class="icon" id="next" data-i18n-title="next"><svg><use href="#i-next"/></svg></button>
+    <span></span>
+  </div>
+  <div class="volume hidden" id="volRow">
+    <button class="icon" id="mute" data-i18n-title="mute"><svg><use href="#i-vol"/></svg></button>
+    <input type="range" id="vol" min="0" max="100" value="0">
+    <span class="val" id="volVal"></span>
+  </div>
+</section>
+
+<div class="notice hidden" id="notice">
+  <div class="txt"><div id="noticeText"></div><div class="act hidden" id="noticeAct"><button class="primary" id="noticeBtn" data-i18n="allowFirewall"></button></div></div>
+  <button class="icon" id="noticeClose" data-i18n-title="close"><svg><use href="#i-x"/></svg></button>
+</div>
+
+<div class="qhead">
+  <h2 data-i18n="queue"></h2>
+  <button class="icon" id="addFiles" data-i18n-title="addVideos"><svg><use href="#i-add"/></svg></button>
+  <button class="icon" id="addFolder" data-i18n-title="addFolder"><svg><use href="#i-folder"/></svg></button>
+  <button class="icon" id="clear" data-i18n-title="clearQueue"><svg><use href="#i-clear"/></svg></button>
+</div>
+<div class="list" id="list">
+  <div class="empty" id="empty">
+    <svg><use href="#i-film"/></svg>
+    <div class="big" data-i18n="dropHere"></div>
+    <div><span data-i18n="emptyOr"></span> <button class="link" id="emptyAdd" data-i18n="emptyPick"></button> · <span data-i18n="emptyExplorer"></span> <i data-i18n="sendToLabel"></i></div>
+  </div>
+  <div id="queue"></div>
+</div>
+<div id="drop" data-i18n="dropOverlay"></div>
+
+<div class="sheet-bg hidden" id="settings">
+  <div class="sheet">
+    <h3 data-i18n="settings"></h3>
+    <div class="opt">
+      <div class="txt"><span data-i18n="optLanguage"></span><div class="sub" data-i18n="optLanguageSub"></div></div>
+      <select id="uiLang"></select>
+    </div>
+    <div class="opt">
+      <div class="txt"><span data-i18n="sendToLabel"></span><div class="sub" data-i18n="optSendToSub"></div></div>
+      <button class="toggle" id="sendto"></button>
+    </div>
+    <div class="opt">
+      <div class="txt"><span data-i18n="optWol"></span><div class="sub" data-i18n="optWolSub"></div></div>
+      <button class="toggle" id="wol"></button>
+    </div>
+    <div class="opt">
+      <div class="txt"><span data-i18n="optLangs"></span><div class="sub" data-i18n="optLangsSub"></div></div>
+      <input type="text" id="langs" spellcheck="false">
+    </div>
+    <div class="opt">
+      <div class="txt"><span data-i18n="optFirewall"></span><div class="sub" data-i18n="optFirewallSub"></div></div>
+      <button class="small-btn" id="fwBtn" data-i18n="allow"></button>
+    </div>
+    <div class="actions"><button class="primary" id="settingsClose" data-i18n="done"></button></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const api = () => window.pywebview.api;
+let S = null;                 // poslední stav z Pythonu
+let L = {}, uiLang = "en";    // texty okna a jazyk (posílá Python, locales/*.json)
+const open = new Set();        // rozbalené položky fronty
+let seeking = false, volDrag = false, volTimer = null;
+
+// --- překlady ---
+function T(key, params) {
+  let s = L[key] ?? key;
+  for (const [k, v] of Object.entries(params || {})) s = s.replaceAll(`{${k}}`, v);
+  return s;
+}
+function applyStrings(data) {
+  L = data.strings || {};
+  uiLang = data.lang || "en";
+  document.documentElement.lang = uiLang;
+  languageNames = null;
+  for (const e of document.querySelectorAll("[data-i18n]")) e.textContent = T(e.dataset.i18n);
+  for (const e of document.querySelectorAll("[data-i18n-title]")) e.title = T(e.dataset.i18nTitle);
+  for (const n of nodes.values()) n.querySelectorAll("[data-i18n], [data-i18n-title]").forEach(e => {
+    if (e.dataset.i18n) e.textContent = T(e.dataset.i18n);
+    if (e.dataset.i18nTitle) e.title = T(e.dataset.i18nTitle);
+  });
+  for (const sel of document.querySelectorAll("select")) delete sel.dataset.key;  // přeložit i nabídky stop
+  if (S) app.update(S);
+}
+
+// Názvy jazyků stop zná prohlížeč (Intl) ve všech jazycích; ffprobe ale hlásí bibliografické
+// kódy ISO 639-2 (cze, ger…), které Intl nezná – ty se převedou na terminologické.
+const ISO_B_TO_T = {cze: "ces", slo: "slk", ger: "deu", fre: "fra", dut: "nld", chi: "zho", gre: "ell", rum: "ron",
+  ice: "isl", per: "fas", arm: "hye", geo: "kat", baq: "eus", wel: "cym", mac: "mkd", alb: "sqi", bur: "mya", may: "msa"};
+let languageNames = null;
+// inline: název uvnitř věty („sous-titres tchèque“) – velké písmeno jen tam, kde ho jazyk má (Czech, Deutsch)
+function langName(code, inline = false) {
+  if (!code || code === "und") return "";
+  try {
+    languageNames = languageNames || new Intl.DisplayNames([uiLang], {type: "language"});
+    const name = languageNames.of(ISO_B_TO_T[code] || code);
+    if (name && name.toLowerCase() !== code) return inline ? name : name.charAt(0).toLocaleUpperCase(uiLang) + name.slice(1);
+  } catch (e) { /* neznámý kód */ }
+  return code.toUpperCase();
+}
+function trackLabel(t) {
+  const lang = langName(t.lang);
+  const parts = [lang];
+  if (t.title && !lang.toLowerCase().includes(t.title.toLowerCase())) parts.push(t.title);
+  if (t.kind === "audio" || !t.file) parts.push(t.format);
+  else parts.push(lang ? T("fileShort", {ext: t.file.split(".").pop().toLowerCase()}) : T("fileNamed", {name: t.file}));
+  if (t.forced) parts.push(T("forced"));
+  return parts.filter(Boolean).join(" · ");
+}
+
+function fmt(s) {
+  if (s == null || isNaN(s)) return "0:00";
+  s = Math.max(0, Math.floor(s));
+  const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = String(s % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+}
+const pct = p => T("percent", {n: Math.round(p * 100)});
+function setP(input) { input.style.setProperty("--p", (100 * (input.value - input.min) / (input.max - input.min || 1)) + "%"); }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c])); }
+
+const app = {
+  update(s) {
+    S = s;
+    renderDevice(); renderNow(); renderNotice(); renderQueue();
+    if (!$("devices").classList.contains("hidden")) renderDevices();
+  }
+};
+window.app = app;
+
+function renderDevice() {
+  const btn = $("deviceBtn");
+  const dev = S.devices.find(d => d.udn === S.device);
+  btn.classList.toggle("ok", !!(dev && dev.online));
+  if (dev) {
+    $("devName").textContent = dev.name;
+    $("devSub").textContent = dev.online ? [dev.model, dev.host].filter(Boolean).join(" · ") : T("offOrAway");
+  } else {
+    $("devName").textContent = S.searching ? T("searchingTv") : T("noTv");
+    $("devSub").textContent = S.searching ? " " : T("noTvHint");
+  }
+}
+
+function renderDevices() {
+  const box = $("devices");
+  box.innerHTML = "";
+  if (!S.devices.length) box.append(el("div", "empty", esc(S.searching ? T("searchingPlayers") : T("noDevicesFound"))));
+  for (const d of S.devices) {
+    const b = el("button", "dev" + (d.udn === S.device ? " sel" : "") + (d.online ? "" : " off"));
+    b.innerHTML = `<span class="dot ${d.online ? "on" : ""}"></span><div class="txt"><div class="name">${esc(d.name)}</div>
+      <div class="sub">${esc(d.online ? [d.model, d.host].filter(Boolean).join(" · ") : T("off") + (d.model ? " · " + d.model : ""))}</div></div>`;
+    if (!d.online && d.canWake) {
+      const w = el("span", "small-btn", esc(T("turnOn")));
+      w.onclick = e => { e.stopPropagation(); api().wake(d.udn); hideDevices(); };
+      b.append(w);
+    }
+    if (!d.online) {
+      const f = el("span", "icon", `<svg style="width:14px;height:14px"><use href="#i-x"/></svg>`);
+      f.title = T("forget");
+      f.onclick = e => { e.stopPropagation(); api().forget(d.udn); };
+      b.append(f);
+    }
+    b.onclick = () => { api().select_device(d.udn); hideDevices(); };
+    box.append(b);
+  }
+  const foot = el("div", "foot", `<span>${esc(S.searching ? T("searching") : T("autoSearch"))}</span>`);
+  const r = el("button", "small-btn", esc(T("searchAgain")));
+  r.onclick = () => api().refresh();
+  foot.append(r);
+  box.append(foot);
+}
+function hideDevices() { $("devices").classList.add("hidden"); }
+
+function renderNow() {
+  const cur = S.queue.find(i => i.id === S.current);
+  const active = ["playing", "paused"].includes(S.state);
+  $("npTitle").textContent = cur ? cur.title : T("nothingPlaying");
+  const name = S.deviceName || "TV";
+  let sub = {
+    idle: cur ? T("stopped") : (S.queue.length ? T("startInQueue") : " "),
+    waking: T("waking", {name}),
+    preparing: cur && cur.progress != null ? T("preparingPct", {pct: pct(cur.progress)}) : T("preparing"),
+    loading: T("startingOn", {name}),
+    playing: T("playingOn", {name}),
+    paused: T("pausedOn", {name}),
+  }[S.state] || " ";
+  if (cur && cur.summary && active) sub += " · " + cur.summary;
+  $("npSub").textContent = sub;
+
+  const dur = S.duration || (cur && cur.duration) || 0;
+  const seek = $("seek");
+  seek.disabled = !active || !dur;
+  if (!seeking) {
+    seek.value = dur ? Math.round(1000 * (S.position || 0) / dur) : 0;
+    $("pos").textContent = fmt(active ? S.position : 0);
+  }
+  setP(seek);
+  $("dur").textContent = fmt(dur);
+
+  $("playIcon").setAttribute("href", S.state === "playing" ? "#i-pause" : "#i-play");
+  const hasReady = S.queue.some(i => i.status === "ready");
+  $("play").disabled = !(active || (S.state === "idle" && hasReady));
+  $("stop").disabled = S.state === "idle";
+  const idx = S.queue.findIndex(i => i.id === S.current);
+  $("prev").disabled = idx < 0;
+  $("next").disabled = idx < 0 || !S.queue.slice(idx + 1).some(i => i.status !== "error");
+
+  const volOk = S.volume != null;
+  $("volRow").classList.toggle("hidden", !volOk);
+  if (volOk && !volDrag) { $("vol").value = S.volume; setP($("vol")); $("volVal").textContent = S.volume; }
+  $("mute").classList.toggle("on", !!S.muted);
+  $("mute").querySelector("use").setAttribute("href", S.muted ? "#i-mute" : "#i-vol");
+}
+
+function renderNotice() {
+  const n = S.notice;
+  $("notice").classList.toggle("hidden", !n);
+  if (!n) return;
+  $("notice").className = "notice " + n.kind;
+  $("noticeText").textContent = n.text;
+  $("noticeAct").classList.toggle("hidden", n.action !== "firewall");
+}
+
+const nodes = new Map();
+function renderQueue() {
+  const q = $("queue");
+  $("empty").classList.toggle("hidden", S.queue.length > 0);
+  $("clear").disabled = !S.queue.some(i => i.id !== S.current);
+  const ids = new Set(S.queue.map(i => i.id));
+  for (const [id, n] of nodes) if (!ids.has(id)) { n.remove(); nodes.delete(id); open.delete(id); }
+  S.queue.forEach((it, i) => {
+    let n = nodes.get(it.id);
+    if (!n) { n = makeItem(it); nodes.set(it.id, n); }
+    updateItem(n, it);
+    if (q.children[i] !== n) q.insertBefore(n, q.children[i] || null);
+  });
+}
+
+function makeItem(it) {
+  const n = el("div", "item");
+  n.innerHTML = `<div class="row">
+      <button class="icon pl" data-i18n-title="play" title="${esc(T("play"))}"></button>
+      <div class="meta"><div class="t"></div><div class="s"></div><div class="bar hidden"><i></i></div></div>
+      <button class="icon more" data-i18n-title="tracksBtn" title="${esc(T("tracksBtn"))}"><svg><use href="#i-chev"/></svg></button>
+      <button class="icon rm" data-i18n-title="remove" title="${esc(T("remove"))}"><svg><use href="#i-x"/></svg></button>
+    </div>
+    <div class="tracks">
+      <label><span data-i18n="audio">${esc(T("audio"))}</span> <select class="aud"></select></label>
+      <label><span data-i18n="subtitles">${esc(T("subtitles"))}</span> <select class="sub"></select></label>
+      <div class="warn hidden"></div>
+    </div>`;
+  const id = it.id;
+  n.querySelector(".pl").onclick = () => {
+    const cur = S.current === id && ["playing", "paused"].includes(S.state);
+    cur ? api().toggle() : api().play(id);
+  };
+  n.querySelector(".row").ondblclick = e => { if (!e.target.closest("button")) api().play(id); };
+  n.querySelector(".rm").onclick = () => api().remove(id);
+  n.querySelector(".more").onclick = () => { open.has(id) ? open.delete(id) : open.add(id); renderQueue(); };
+  const send = () => api().tracks(id, n.querySelector(".aud").value || null, n.querySelector(".sub").value);
+  n.querySelector(".aud").onchange = send;
+  n.querySelector(".sub").onchange = send;
+  return n;
+}
+
+function fillSelect(sel, options, value) {
+  const key = JSON.stringify(options);
+  if (sel.dataset.key !== key) {
+    sel.innerHTML = options.map(o => `<option value="${esc(o.id)}"${o.disabled ? " disabled" : ""}>${esc(o.label)}</option>`).join("");
+    sel.dataset.key = key;
+  }
+  if (document.activeElement !== sel) sel.value = value ?? "";
+}
+
+function updateItem(n, it) {
+  const isCur = it.id === S.current;
+  n.className = "item" + (isCur ? " current" : "") + (it.status === "error" ? " error" : "") + (it.status === "done" ? " done" : "")
+    + (open.has(it.id) ? " open" : "") + (S.state === "paused" ? " paused" : "");
+  n.querySelector(".t").textContent = it.title;
+  let s;
+  if (it.status === "probing") s = T("loadingItem");
+  else if (it.status === "error") s = it.error;
+  else if (it.progress != null) s = T("preparingItem", {pct: pct(it.progress)});
+  else {
+    const a = it.audioTracks.find(t => t.id === it.audio), sub = it.subTracks.find(t => t.id === it.sub);
+    s = [it.summary, it.duration ? fmt(it.duration) : "", a && it.audioTracks.length > 1 ? langName(a.lang) : "",
+         sub ? (sub.lang ? T("subsOf", {lang: langName(sub.lang, true)}) : T("subsFromFile")) : ""].filter(Boolean).join(" · ");
+    if (it.status === "done") s = T("played") + " · " + s;
+  }
+  n.querySelector(".s").textContent = s;
+  const bar = n.querySelector(".bar");
+  bar.classList.toggle("hidden", it.progress == null);
+  bar.querySelector("i").style.width = ((it.progress || 0) * 100) + "%";
+
+  const pl = n.querySelector(".pl");
+  const playingHere = isCur && ["playing", "paused", "loading", "preparing", "waking"].includes(S.state);
+  const want = playingHere && S.state === "playing" ? "eq" : "play";
+  if (pl.dataset.v !== want) {
+    pl.dataset.v = want;
+    pl.innerHTML = want === "eq" ? `<span class="eq"><i></i><i></i><i></i></span>`
+      : `<svg style="fill:currentColor;stroke:none;width:16px;height:16px"><use href="#i-play"/></svg>`;
+  }
+  pl.disabled = it.status === "error" || it.status === "probing";
+  pl.classList.toggle("on", playingHere);
+  n.querySelector(".more").classList.toggle("open", open.has(it.id));
+  n.querySelector(".more").disabled = !it.audioTracks.length;
+
+  fillSelect(n.querySelector(".aud"), it.audioTracks.map(t => ({id: t.id, label: trackLabel(t)})), it.audio);
+  fillSelect(n.querySelector(".sub"), [{id: "none", label: T("noSubs")},
+    ...it.subTracks.map(t => ({id: t.id, label: trackLabel(t) + (t.image ? " " + T("tvWontShow") : ""), disabled: t.image}))], it.sub);
+  const w = n.querySelector(".warn");
+  const warn = it.subTracks.length && it.subTracks.every(t => t.image) ? T("imageSubsWarn", {name: it.title + ".srt"}) : "";
+  w.textContent = warn;
+  w.classList.toggle("hidden", !warn);
+}
+
+// --- ovládání ---
+$("deviceBtn").onclick = e => {
+  e.stopPropagation();
+  const box = $("devices");
+  if (box.classList.toggle("hidden")) return;
+  renderDevices();
+  api().refresh();
+};
+document.addEventListener("click", e => { if (!e.target.closest("#devices")) hideDevices(); });
+$("play").onclick = () => api().toggle();
+$("stop").onclick = () => api().stop();
+$("prev").onclick = () => api().step(-1);
+$("next").onclick = () => api().step(1);
+$("addFiles").onclick = $("emptyAdd").onclick = () => api().add_files();
+$("addFolder").onclick = () => api().add_folder();
+$("clear").onclick = () => api().clear();
+$("noticeClose").onclick = () => api().dismiss();
+$("noticeBtn").onclick = () => api().firewall();
+
+const seek = $("seek");
+seek.oninput = () => {
+  seeking = true; setP(seek);
+  const dur = S.duration || 0;
+  $("pos").textContent = fmt(dur * seek.value / 1000);
+};
+seek.onchange = () => {
+  const dur = S.duration || 0;
+  api().seek(dur * seek.value / 1000).finally(() => setTimeout(() => seeking = false, 1500));
+};
+
+const vol = $("vol");
+vol.oninput = () => {
+  volDrag = true; setP(vol); $("volVal").textContent = vol.value;
+  clearTimeout(volTimer);
+  volTimer = setTimeout(() => api().volume(+vol.value), 120);
+};
+vol.onchange = () => setTimeout(() => volDrag = false, 2000);
+$("mute").onclick = () => api().mute(!S.muted);
+
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input[type=text], select")) return;
+  if (e.code === "Space") { e.preventDefault(); if (!$("play").disabled) api().toggle(); }
+  if (S && ["playing", "paused"].includes(S.state) && (e.code === "ArrowRight" || e.code === "ArrowLeft")) {
+    e.preventDefault();
+    api().seek(Math.max(0, (S.position || 0) + (e.code === "ArrowRight" ? 10 : -10)));
+  }
+  if (e.code === "Escape") { hideDevices(); closeSettings(); }
+});
+
+// Přetažení souborů: soubory přebírá Python (pywebview), tady jen překryv.
+let dragDepth = 0;
+document.addEventListener("dragenter", e => { if (e.dataTransfer.types.includes("Files")) { dragDepth++; document.body.classList.add("dragging"); } });
+document.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("dragging"); } });
+document.addEventListener("drop", () => { dragDepth = 0; document.body.classList.remove("dragging"); });
+
+// Nastavení
+function applySettings(s) {
+  if (!s) return;
+  if (s.error) alert(s.error);
+  if ("sendto" in s) $("sendto").classList.toggle("on", s.sendto);
+  if ("wol" in s) $("wol").classList.toggle("on", s.wol);
+  if ("langs" in s && document.activeElement !== $("langs")) $("langs").value = s.langs;
+  if ("langsDefault" in s) $("langs").placeholder = s.langsDefault;
+  if (s.languages) {
+    const opts = [["auto", T("autoLang", {name: s.languages[s.systemLang] || s.systemLang})], ...Object.entries(s.languages)];
+    $("uiLang").innerHTML = opts.map(([code, name]) => `<option value="${esc(code)}">${esc(name)}</option>`).join("");
+    $("uiLang").value = s.uiLang;
+  }
+}
+$("settingsBtn").onclick = async () => { applySettings(await api().settings()); $("settings").classList.remove("hidden"); };
+function closeSettings() { $("settings").classList.add("hidden"); }
+$("settingsClose").onclick = closeSettings;
+$("settings").onclick = e => { if (e.target === $("settings")) closeSettings(); };
+$("sendto").onclick = async () => applySettings(await api().set_sendto(!$("sendto").classList.contains("on")));
+$("wol").onclick = async () => applySettings(await api().set_wol(!$("wol").classList.contains("on")));
+$("langs").onchange = async () => applySettings(await api().set_langs($("langs").value));
+$("uiLang").onchange = async () => {
+  applyStrings(await api().set_ui_lang($("uiLang").value));
+  applySettings(await api().settings());  // „Podle systému (…)“ v novém jazyce
+};
+$("fwBtn").onclick = async () => { const r = await api().firewall(); if (r && r.error) alert(r.error); };
+
+window.addEventListener("pywebviewready", async () => {
+  applyStrings(await api().strings());
+  app.update(await api().state());
+});
+</script>
+</body>
+</html>

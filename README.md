@@ -1,0 +1,61 @@
+# File2TV
+
+Přehrání videa z počítače na TV v domácí síti (DLNA) – náhrada „Vysílat do zařízení“ z Windows,
+která video převádí do WMV, 16:9 zmáčkne do 4:3 a zahodí titulky.
+
+- Najde v síti zapnuté televize a další DLNA přehrávače videa (LG, Samsung, Sony, Philips…)
+  i zařízení s Chromecastem (Google TV, Nvidia Shield, Chromecast, Nest Hub); zvukové přehrávače
+  (Sonos, skupiny reproduktorů) vynechá. Vypnuté DLNA TV umí zkusit zapnout přes Wake-on-LAN – jen
+  když se to zapne v nastavení (výchozí vypnuto) a TV má povolené zapnutí přes síť; Chromecasty ne.
+- Chromecast: přehrávač Googlu bere jen MP4/WebM, takže MKV se vždy přebalí do MP4 (obraz beze
+  změny) a titulky jdou zvlášť jako WebVTT (i ty vložené ve videu – vytáhnou se při přebalení).
+  Shield přes Chromecast Dolby Vision nepošle (ověřeno, hraje HDR10). Chromecast nehlásí, co
+  umí, proto má aplikace tabulku známých modelů: Nest Hub neumí HEVC a Dolby zvuk (ověřeno –
+  AC3/E-AC3 převede na AAC stereo, u HEVC rovnou řekne, že to nepůjde), „puk“ 1.–3. generace
+  umí jen H.264.
+- Video jde do TV beze změny, TV si ho stahuje z malého HTTP serveru v aplikaci (přetáčení funguje).
+- Jen když je potřeba, ffmpeg video **bez překódování obrazu** přebalí (do `%TEMP%\File2TV`):
+  vybraný zvuk a titulky dá první a jako výchozí, zvuk DTS/TrueHD/Opus převede na AC3/AAC,
+  titulky ležící vedle videa (`Film.srt`, `Film.cs.srt`, kódování CP1250 i UTF-8) vloží.
+  Další video ve frontě se připravuje už během přehrávání předchozího.
+- Dolby Vision (profil 5 a 8) jde do TV jako MP4 se záznamem DV (dvcC, značka hvc1) – LG CX
+  zapne Dolby Vision jen u MP4, z MKV a TS hraje jen HDR10. Titulky jsou pak uvnitř MP4 (mov_text).
+  Samsung Dolby Vision neumí: profil 8 dostane beze změny (hraje jako HDR10), u profilu 5
+  aplikace upozorní na špatné barvy.
+- Obrázkové titulky z Blu-ray/DVD (PGS) TV přes DLNA neukáže – aplikace na to upozorní.
+- Fronta, pauza, přetáčení (i šipkami), hlasitost (pokud ji TV přes DLNA nabízí), výběr zvuku
+  a titulků, „Odeslat do → File2TV“ v Průzkumníku, ikona v oznamovací oblasti. Křížek během
+  přehrávání okno jen schová. PC během přehrávání neusne (obrazovka zhasnout smí).
+
+Nastavení a log: `%APPDATA%\File2TV\` (`config.json`, `file2tv.log`).
+
+## Jazyky
+
+Aplikace mluví jazykem Windows (čeština, angličtina, slovenština, němčina, polština, francouzština,
+španělština, italština; jinak anglicky), v nastavení jde jazyk změnit. Texty jsou
+v `tvcast/locales/<kód>.json` – klíče `ui.*` pro okno, ostatní pro hlášky z Pythonu; chybějící
+text se vezme z angličtiny. Názvy jazyků zvukových stop a titulků dává prohlížeč (`Intl.DisplayNames`),
+takže nejsou potřeba v překladech. Nový jazyk = nový JSON + záznam v `i18n.LANGUAGES`.
+Překlady mimo češtinu a angličtinu jsou strojové – rodilý mluvčí je může vylepšit.
+
+## Vývoj
+
+Windows 10/11, Python 3.13:
+
+```
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+.\get-ffmpeg.ps1
+.venv\Scripts\python main.py [video …]
+```
+
+`get-ffmpeg.ps1` stáhne do `ffmpeg\` [BtbN ffmpeg 9.0 LGPL shared](https://github.com/BtbN/FFmpeg-Builds/releases)
+bez ffplay (~75 MB, licence v `ffmpeg\LICENSE.txt`); do Gitu nepatří. Bez něj aplikace použije ffmpeg z PATH.
+
+## Sestavení
+
+`.\build.ps1` → `dist\File2TV\` (~190 MB, celou složku jde zkopírovat kamkoli nebo zazipovat),
+ffmpeg ze složky `ffmpeg\` se zkopíruje vedle .exe.
+
+První spuštění: Windows se zeptá na firewall – povolit pro soukromou síť. Když TV video nenačte,
+nabídne aplikace tlačítko „Povolit ve firewallu“ (Windows se zeptá na oprávnění správce).

@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+dist/
+build/
+*.spec
+# ffmpeg se stahuje skriptem get-ffmpeg.ps1 (jedna DLL má přes 90 MB)
+ffmpeg/
+.claude/
