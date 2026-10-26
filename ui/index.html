@@ -241,6 +241,14 @@
       <button class="toggle" id="sendto"></button>
     </div>
     <div class="opt">
+      <div class="txt"><span data-i18n="optHdAudio"></span><div class="sub" data-i18n="optHdAudioSub"></div></div>
+      <button class="toggle" id="hdAudio"></button>
+    </div>
+    <div class="opt">
+      <div class="txt"><span data-i18n="optDvMp4"></span><div class="sub" data-i18n="optDvMp4Sub"></div></div>
+      <button class="toggle" id="dvMp4"></button>
+    </div>
+    <div class="opt">
       <div class="txt"><span data-i18n="optWol"></span><div class="sub" data-i18n="optWolSub"></div></div>
       <button class="toggle" id="wol"></button>
     </div>
@@ -577,6 +585,8 @@ function applySettings(s) {
   if (s.error) alert(s.error);
   if ("sendto" in s) $("sendto").classList.toggle("on", s.sendto);
   if ("wol" in s) $("wol").classList.toggle("on", s.wol);
+  if ("convertHdAudio" in s) $("hdAudio").classList.toggle("on", s.convertHdAudio);
+  if ("dvToMp4" in s) $("dvMp4").classList.toggle("on", s.dvToMp4);
   if ("langs" in s && document.activeElement !== $("langs")) $("langs").value = s.langs;
   if ("langsDefault" in s) $("langs").placeholder = s.langsDefault;
   if (s.languages) {
@@ -590,6 +600,8 @@ function closeSettings() { $("settings").classList.add("hidden"); }
 $("settingsClose").onclick = closeSettings;
 $("settings").onclick = e => { if (e.target === $("settings")) closeSettings(); };
 $("sendto").onclick = async () => applySettings(await api().set_sendto(!$("sendto").classList.contains("on")));
+$("hdAudio").onclick = async () => applySettings(await api().set_pref("convert_hd_audio", !$("hdAudio").classList.contains("on")));
+$("dvMp4").onclick = async () => applySettings(await api().set_pref("dv_to_mp4", !$("dvMp4").classList.contains("on")));
 $("wol").onclick = async () => applySettings(await api().set_wol(!$("wol").classList.contains("on")));
 $("langs").onchange = async () => applySettings(await api().set_langs($("langs").value));
 $("uiLang").onchange = async () => {

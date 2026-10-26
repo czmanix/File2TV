@@ -253,6 +253,8 @@ class Api:
     def settings(self) -> dict:
         return {"sendto": winutil.sendto_installed(), "langs": ", ".join(i18n.preferred_langs(self._app.cfg)),
                 "langsDefault": ", ".join(i18n.default_langs()), "wol": bool(self._app.cfg.get("wake_on_lan")),
+                "convertHdAudio": self._app.cfg.get("convert_hd_audio", True),
+                "dvToMp4": self._app.cfg.get("dv_to_mp4", True),
                 "uiLang": self._app.cfg.get("ui_lang", "auto"), "systemLang": i18n.system_language(),
                 "languages": i18n.LANGUAGES}
 
@@ -277,6 +279,13 @@ class Api:
         self._app.cfg["wake_on_lan"] = bool(on)
         winutil.save_config(self._app.cfg)
         self._app.loop.call_soon_threadsafe(self._p()._changed)  # tlačítka u vypnutých TV
+        return self.settings()
+
+    def set_pref(self, name: str, on: bool) -> dict:
+        """Volby přebalení (převod TrueHD/DTS, Dolby Vision do MP4) – platí od dalšího videa."""
+        if name in ("convert_hd_audio", "dv_to_mp4"):
+            self._app.cfg[name] = bool(on)
+            winutil.save_config(self._app.cfg)
         return self.settings()
 
     def set_langs(self, text: str) -> dict:

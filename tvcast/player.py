@@ -75,8 +75,8 @@ class Item:
     def title(self) -> str:
         return self.path.stem
 
-    def choice(self, dev: Device | None) -> tuple:
-        return self.audio, self.sub, dev.caps_key if dev else ()
+    def choice(self, dev: Device | None, prefs: dict) -> tuple:
+        return self.audio, self.sub, dev.caps_key if dev else (), tuple(sorted(prefs.items()))
 
     def as_dict(self, current: bool) -> dict:
         i = self.info
@@ -117,6 +117,11 @@ class Player:
         self._last_volume_poll = 0.0
 
     # --- stav pro GUI ---
+
+    @property
+    def prefs(self) -> dict:
+        """Volby přebalení z nastavení (výchozí zapnuto) – viz media.plan."""
+        return {"convert_hd_audio": self.cfg.get("convert_hd_audio", True), "dv_to_mp4": self.cfg.get("dv_to_mp4", True)}
 
     @property
     def wake_enabled(self) -> bool:
@@ -466,10 +471,10 @@ class Player:
 
     async def _prepare(self, item: Item, dev: Device) -> tuple[Path, media.Plan]:
         """Soubor pro TV – původní, nebo přebalený (sdílí se s přípravou dopředu)."""
-        choice = item.choice(dev)
+        choice = item.choice(dev, self.prefs)
         if item.prepared and item.prepared[0] == choice and item.prepared[1].exists():
             return item.prepared[1], item.prepared[2]
-        plan = media.plan(item.info, item.audio, item.sub, dev)
+        plan = media.plan(item.info, item.audio, item.sub, dev, **self.prefs)
         if plan.error:
             raise media.MediaError(plan.error)  # rovnou, ať se zbytečně nepřebaluje
         if not plan.remux and not plan.extract:
@@ -514,11 +519,11 @@ class Player:
         nxt = self._next_after(after)
         if not nxt or not nxt.info:
             return
-        plan = media.plan(nxt.info, nxt.audio, nxt.sub, dev)
+        plan = media.plan(nxt.info, nxt.audio, nxt.sub, dev, **self.prefs)
         busy = nxt.prep_task and not nxt.prep_task.done()
-        if (plan.remux or plan.extract) and not plan.error and not busy and not (nxt.prepared and nxt.prepared[0] == nxt.choice(dev)):
-            nxt.prep_task = asyncio.create_task(self._build(nxt, plan, nxt.choice(dev)))
-            nxt.prep_task.choice = nxt.choice(dev)
+        if (plan.remux or plan.extract) and not plan.error and not busy and not (nxt.prepared and nxt.prepared[0] == nxt.choice(dev, self.prefs)):
+            nxt.prep_task = asyncio.create_task(self._build(nxt, plan, nxt.choice(dev, self.prefs)))
+            nxt.prep_task.choice = nxt.choice(dev, self.prefs)
             nxt.prep_task.add_done_callback(lambda t: t.cancelled() or t.exception())
 
     async def _play_one(self, item: Item, start_at: float) -> bool:

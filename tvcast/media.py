@@ -20,6 +20,7 @@ from .i18n import t
 
 VIDEO_SUFFIXES = {".mkv", ".mp4", ".m4v", ".avi", ".mov", ".ts", ".m2ts", ".mts", ".webm", ".wmv", ".mpg", ".mpeg", ".flv"}
 TV_AUDIO = {"aac", "ac3", "eac3", "mp3"}  # zvuk, který přehraje prakticky každá TV
+HD_AUDIO = frozenset({"truehd", "dts"})  # Blu-ray zvuk (i Atmos, DTS-HD MA): LG CX přes DLNA bez zvuku, Kodi ano
 SUB_SUFFIXES = {".srt": "srt", ".ass": "ass", ".ssa": "ass"}
 IMAGE_SUBS = {"hdmv_pgs_subtitle", "dvd_subtitle", "dvb_subtitle"}  # z Blu-ray/DVD, TV přes DLNA neukážou
 MIME = {".mkv": "video/x-matroska", ".mp4": "video/mp4", ".m4v": "video/mp4", ".avi": "video/x-msvideo",
@@ -232,15 +233,20 @@ class Plan:
         return bool(self.sidecar and not self.sidecar.file)
 
 
-def plan(info: MediaInfo, audio_id: str | None, sub_id: str, dev) -> Plan:
+def plan(info: MediaInfo, audio_id: str | None, sub_id: str, dev,
+         convert_hd_audio: bool = True, dv_to_mp4: bool = True) -> Plan:
     """Co je potřeba udělat, aby přehrávač video přehrál s vybraným zvukem a titulky.
 
     dev popisuje přehrávač: accepts(mime) -> bool|None, mime_for(*mimes) -> str|None,
     dolby_vision (False = neumí, None = nevíme), embeds_subtitles (ukáže titulky uvnitř videa).
+    convert_hd_audio a dv_to_mp4 jsou volby z nastavení (výchozí zapnuto, viz Player.prefs).
     """
     accepts, mime_for, dolby_vision_tv = dev.accepts, dev.mime_for, dev.dolby_vision
     embeds = dev.embeds_subtitles
-    audio_ok = frozenset(getattr(dev, "audio_codecs", None) or TV_AUDIO)
+    known_audio = getattr(dev, "audio_codecs", None)  # zařízení, u kterých víme, co umí (Nest Hub)
+    audio_ok = frozenset(known_audio or TV_AUDIO)
+    if not convert_hd_audio and not known_audio:
+        audio_ok |= HD_AUDIO  # uživatel ví, že jeho TV/přehrávač TrueHD a DTS umí (Kodi, Sony…)
     video_ok = getattr(dev, "video_codecs", None)
     suffix = info.path.suffix.lower()
     # MKV má víc názvů (Samsung chce video/x-mkv) – pošle se pod tím, který TV hlásí.
@@ -275,7 +281,8 @@ def plan(info: MediaInfo, audio_id: str | None, sub_id: str, dev) -> Plan:
     # Dolby Vision zapne LG (ověřeno na CX) jen u MP4 se záznamem dvcC – z MKV a TS hraje jen HDR10.
     # TV bez Dolby Vision přehraje profil 8 jako HDR10, přebalování je zbytečné. Profil 5 HDR10
     # základ nemá – bez Dolby Vision bude mít špatné barvy a pomohlo by jen překódování.
-    dv = dolby_vision(info) and accepts("video/mp4") is not False and dolby_vision_tv is not False
+    dv = (dolby_vision(info) and dv_to_mp4 and accepts("video/mp4") is not False
+          and dolby_vision_tv is not False)
     if dolby_vision(info) and dolby_vision_tv is False and info.video.get("dv_profile") == 5:
         warnings.append(t("warn.dv5"))
     if dv and suffix not in (".mp4", ".m4v"):
@@ -360,9 +367,14 @@ def ffmpeg_args(info: MediaInfo, audio_id: str | None, sub_id: str, p: Plan, out
     if mkv:
         for idx in info.attachments:  # písma pro titulky ASS
             maps += ["-map", f"0:{idx}"]
-    elif dolby_vision(info):
-        # Záznam dvcC zapíše ffmpeg do MP4 jen s -strict unofficial; hvc1 přehraje i TV bez Dolby Vision.
-        opts += ["-strict", "unofficial", "-tag:v", "hvc1"]
+    else:
+        # Záznam dvcC zapíše ffmpeg do MP4 jen s -strict unofficial, TrueHD (když se nepřevádí)
+        # dokonce jen s experimental (to platí i pro dvcC). hvc1 přehraje i TV bez Dolby Vision.
+        truehd = any(a.codec == "truehd" and a.codec in p.audio_ok for a in info.audio)
+        if truehd or dolby_vision(info):
+            opts += ["-strict", "experimental" if truehd else "unofficial"]
+        if dolby_vision(info):
+            opts += ["-tag:v", "hvc1"]
     args = cmd + maps + opts + ["-progress", "pipe:1", "-nostats", str(out)]
     if vtt_out and sub and not sub.file:
         args += ["-map", f"0:{sub.index}", "-c:s", "webvtt", str(vtt_out)]
