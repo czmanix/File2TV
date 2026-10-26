@@ -1,24 +1,23 @@
 # File2TV
 
-Přehrání videa z počítače na TV v domácí síti (DLNA) – náhrada „Vysílat do zařízení“ z Windows,
-která video převádí do WMV, 16:9 zmáčkne do 4:3 a zahodí titulky.
+Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – náhrada omezeného „Vysílat do zařízení“ z Windows.
 
-- Najde v síti zapnuté televize a další DLNA přehrávače videa (LG, Samsung, Sony, Philips…)
-  i zařízení s Chromecastem (Google TV, Nvidia Shield, Chromecast, Nest Hub); zvukové přehrávače
-  (Sonos, skupiny reproduktorů) vynechá. Vypnuté DLNA TV umí zkusit zapnout přes Wake-on-LAN – jen
+- Najde v síti zapnuté televize a další DLNA přehrávače videa (LG, Samsung, ...)
+  i zařízení s Google cast (Google TV, Nvidia Shield, Chromecast, Nest Hub); vynechá zvukové přehrávače
+  (Sonos, skupiny reproduktorů). Vypnuté DLNA TV umí zkusit zapnout přes Wake-on-LAN – jen
   když se to zapne v nastavení (výchozí vypnuto) a TV má povolené zapnutí přes síť; Chromecasty ne.
-- Chromecast: přehrávač Googlu bere jen MP4/WebM, takže MKV se vždy přebalí do MP4 (obraz beze
+- Google Cast: přehrávač Googlu bere jen MP4/WebM, takže MKV se vždy přebalí do MP4 (obraz beze
   změny) a titulky jdou zvlášť jako WebVTT (i ty vložené ve videu – vytáhnou se při přebalení).
-  Shield přes Chromecast Dolby Vision nepošle (ověřeno, hraje HDR10). Chromecast nehlásí, co
+  Shield přes Chromecast Dolby Vision nepřijme (ověřeno, hraje HDR10). Chromecast nehlásí, co
   umí, proto má aplikace tabulku známých modelů: Nest Hub neumí HEVC a Dolby zvuk (ověřeno –
   AC3/E-AC3 převede na AAC stereo, u HEVC rovnou řekne, že to nepůjde), „puk“ 1.–3. generace
   umí jen H.264.
 - Video jde do TV beze změny, TV si ho stahuje z malého HTTP serveru v aplikaci (přetáčení funguje).
 - Jen když je potřeba, ffmpeg video **bez překódování obrazu** přebalí (do `%TEMP%\File2TV`):
-  vybraný zvuk a titulky dá první a jako výchozí, zvuk DTS/TrueHD/Opus převede na AC3/AAC,
+  vybraný zvuk a titulky dá první a jako výchozí, zvuk DTS/TrueHD/Opus převede na AC3/AAC, Dolby Atmos v eAC3 nechává,
   titulky ležící vedle videa (`Film.srt`, `Film.cs.srt`, kódování CP1250 i UTF-8) vloží.
   Další video ve frontě se připravuje už během přehrávání předchozího.
-- Dolby Vision (profil 5 a 8) jde do TV jako MP4 se záznamem DV (dvcC, značka hvc1) – LG CX
+- Dolby Vision (profil 5 a 8) jde do TV jako MP4 se záznamem DV (dvcC, značka hvc1) – LG 
   zapne Dolby Vision jen u MP4, z MKV a TS hraje jen HDR10. Titulky jsou pak uvnitř MP4 (mov_text).
   Samsung Dolby Vision neumí: profil 8 dostane beze změny (hraje jako HDR10), u profilu 5
   aplikace upozorní na špatné barvy.
