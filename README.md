@@ -62,3 +62,27 @@ ffmpeg ze složky `ffmpeg\` se zkopíruje vedle .exe.
 
 První spuštění: Windows se zeptá na firewall – povolit pro soukromou síť. Když TV video nenačte,
 nabídne aplikace tlačítko „Povolit ve firewallu“ (Windows se zeptá na oprávnění správce).
+
+## Přenos na macOS / Linux
+
+Aplikace je zatím jen pro Windows a jinde nebyla vyzkoušená. Jádro je přenositelné: hledání
+a ovládání přehrávačů (DLNA, Chromecast), HTTP server, rozhodování o přebalení (ffmpeg), okno
+(pywebview má na Macu WebKit) a překlady. Přepsat je potřeba tohle:
+
+| Místo | Teď (Windows) | Náhrada jinde |
+|---|---|---|
+| `winutil.KeepAwake` | `PowerCreateRequest` / `PowerSetRequest` | macOS: `caffeinate -i` (nebo IOKit), Linux: `systemd-inhibit` |
+| `winutil.set_sendto` | zástupce ve složce SendTo (PowerShell, WScript.Shell) | macOS: „Otevřít v aplikaci“ / Služby Finderu; Linux: `.desktop` soubor |
+| `winutil.allow_firewall` | `netsh` přes UAC | macOS se zeptá sám – tlačítko skrýt; Linux podle distribuce |
+| `winutil.mac_address` | `SendARP` (iphlpapi) | `arp -n <ip>` nebo `ip neigh` |
+| `winutil.CONFIG`, `SENDTO` | `%APPDATA%` | `~/Library/Application Support/File2TV`, `~/.config/File2TV` |
+| `upnp.local_addresses` | adresy z `getaddrinfo(gethostname())` | na Macu často jen 127.0.0.1 – použít třeba balíček `ifaddr` |
+| `icon.tray` + `App.run` | pystray ve vlastním vlákně | na Macu musí běžet v hlavním vlákně (tam je pywebview) – ikonu v liště řešit jinak, nebo vynechat |
+| `icon.dark_mode` | registr Windows | WebView se řídí systémem sám, jen barva okna před načtením |
+| `i18n.system_language` | `GetUserDefaultUILanguage` | už má záložní `locale` |
+| `media.tool` | hledá `ffmpeg.exe` vedle aplikace, jinak PATH | bez `.exe`; na Macu stačí `brew install ffmpeg` |
+| `build.ps1`, `get-ffmpeg.ps1` | PowerShell, PyInstaller `--windowed` → `.exe` | shell skript, PyInstaller → `.app`; ffmpeg pro danou platformu |
+
+Na Macu je pro šíření potřeba aplikaci podepsat a notarizovat (Apple Developer účet), jinak ji uživatel
+musí povolit ručně (pravé tlačítko → Otevřít). Ověřené chování konkrétních TV a přehrávačů, které by se
+při přepisu nemělo rozbít, je v `CLAUDE.md`.
