@@ -2,7 +2,7 @@
 
 [English](README.md) | **Čeština**
 
-Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – náhrada omezeného „Vysílat do zařízení“ z Windows. Snaží se zachovat nejvyšší dostupnou kvalitu (Dolby Vision, Dolby Atmos, TrueHD, ...). Google Cast nepodporuje Dolby Vision, přehrává ho jako HDR10.
+Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – náhrada omezeného „Vysílat do zařízení“ z Windows. Snaží se zachovat nejvyšší dostupnou kvalitu (Dolby Vision, Dolby Atmos, TrueHD, ...). Google Cast nepodporuje soubory s Dolby Vision, přehrává je jako HDR10.
 
 - Najde v síti zapnuté televize a další DLNA přehrávače videa (LG, Samsung, ...)
   i zařízení s Google cast (Google TV, Nvidia Shield, Chromecast, Nest Hub); vynechá zvukové přehrávače
@@ -10,7 +10,7 @@ Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – 
   když se to zapne v nastavení (výchozí vypnuto) a TV má povolené zapnutí přes síť; Chromecasty ne.
 - Google Cast: přehrávač Googlu bere jen MP4/WebM, takže MKV se vždy přebalí do MP4 (obraz beze
   změny) a titulky jdou zvlášť jako WebVTT (i ty vložené ve videu – vytáhnou se při přebalení).
-  Shield přes Chromecast Dolby Vision nepřijme (ověřeno, hraje HDR10). Chromecast nehlásí, co
+  Shield přes Google Cast nepřijme Dolby Vision (ověřeno, hraje HDR10). Google Cast nehlásí, co
   umí, proto má aplikace tabulku známých modelů: Nest Hub neumí HEVC a Dolby zvuk (ověřeno –
   AC3/E-AC3 převede na AAC stereo, u HEVC rovnou řekne, že to nepůjde), „puk“ 1.–3. generace
   umí jen H.264.
