@@ -88,3 +88,7 @@ and controlling players (DLNA, Chromecast), the HTTP server, the repacking decis
 To distribute on a Mac the app has to be signed and notarized (Apple Developer account); otherwise the user
 has to allow it manually (right-click → Open). The verified behaviour of specific TVs and players, which shouldn't
 break when porting, is in `CLAUDE.md`.
+
+## License
+
+[MIT](LICENSE). Release builds bundle [FFmpeg](https://ffmpeg.org) ([BtbN build](https://github.com/BtbN/FFmpeg-Builds)), licensed under the GNU LGPL – its licence text is in `ffmpeg\LICENSE.txt` next to the application.

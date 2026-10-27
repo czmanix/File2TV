@@ -88,3 +88,7 @@ a ovládání přehrávačů (DLNA, Chromecast), HTTP server, rozhodování o p�
 Na Macu je pro šíření potřeba aplikaci podepsat a notarizovat (Apple Developer účet), jinak ji uživatel
 musí povolit ručně (pravé tlačítko → Otevřít). Ověřené chování konkrétních TV a přehrávačů, které by se
 při přepisu nemělo rozbít, je v `CLAUDE.md`.
+
+## Licence
+
+[MIT](LICENSE). Vydané sestavení obsahuje [FFmpeg](https://ffmpeg.org) ([build od BtbN](https://github.com/BtbN/FFmpeg-Builds)) pod licencí GNU LGPL – její text je v `ffmpeg\LICENSE.txt` vedle aplikace.
