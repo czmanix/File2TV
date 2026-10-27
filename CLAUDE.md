@@ -32,8 +32,8 @@ Cast devices may also have `video_codecs`/`audio_codecs` (known limits).
 
 ## Rules – don't break these
 
-- **Delete only files the app created in `media.TEMP`** (`%TEMP%\File2TV`). An earlier bug deleted the
-  *original* video after direct playback; `player._is_temp` guards every unlink. Keep it that way.
+- **Delete only files the app created in `media.TEMP`** (`%TEMP%\File2TV`), never the user's videos;
+  `player._is_temp` guards every unlink.
 - **No picture re-encoding.** If a device can't decode the video codec, say so (`plan.error`), don't transcode.
 - Every user-visible text goes through `t("key")` (Python) or `T("key")` (JS, keys `ui.*`) and must exist in
   **all 8** `tvcast/locales/*.json` (cs, en, sk, de, pl, fr, es, it) with the same `{placeholders}`.
