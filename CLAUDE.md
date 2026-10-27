@@ -6,8 +6,11 @@ network over **DLNA (UPnP AVTransport)** or **Google Cast**. Replacement for Win
 Principle: **never re-encode the picture.** The file goes to the TV unchanged; only when
 needed ffmpeg *repacks* it (container, audio, subtitles).
 
-Code comments, log messages and the README are in Czech; user-facing texts are translated
-(see i18n). The internal package is still called `tvcast` (the app was renamed to File2TV).
+Code comments and log messages are in Czech; user-facing texts are translated (see i18n).
+The internal package is still called `tvcast` (the app was renamed to File2TV).
+
+The README exists in two languages: `README.md` (English, shown by GitHub) and `README.cs.md`
+(Czech). **Keep them in sync** – every change goes into both files.
 
 ## Layout
 
@@ -98,4 +101,4 @@ python -m venv .venv
 
 ## Porting to macOS/Linux
 
-See the "Přenos na macOS / Linux" section in README.md – the Windows-specific parts are listed there.
+See the "Porting to macOS / Linux" section in README.md – the Windows-specific parts are listed there.

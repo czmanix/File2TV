@@ -1,47 +1,49 @@
 # File2TV
 
-Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – náhrada omezeného „Vysílat do zařízení“ z Windows.
+**English** | [Čeština](README.cs.md)
 
-- Najde v síti zapnuté televize a další DLNA přehrávače videa (LG, Samsung, ...)
-  i zařízení s Google cast (Google TV, Nvidia Shield, Chromecast, Nest Hub); vynechá zvukové přehrávače
-  (Sonos, skupiny reproduktorů). Vypnuté DLNA TV umí zkusit zapnout přes Wake-on-LAN – jen
-  když se to zapne v nastavení (výchozí vypnuto) a TV má povolené zapnutí přes síť; Chromecasty ne.
-- Google Cast: přehrávač Googlu bere jen MP4/WebM, takže MKV se vždy přebalí do MP4 (obraz beze
-  změny) a titulky jdou zvlášť jako WebVTT (i ty vložené ve videu – vytáhnou se při přebalení).
-  Shield přes Chromecast Dolby Vision nepřijme (ověřeno, hraje HDR10). Chromecast nehlásí, co
-  umí, proto má aplikace tabulku známých modelů: Nest Hub neumí HEVC a Dolby zvuk (ověřeno –
-  AC3/E-AC3 převede na AAC stereo, u HEVC rovnou řekne, že to nepůjde), „puk“ 1.–3. generace
-  umí jen H.264.
-- Video jde do TV beze změny, TV si ho stahuje z malého HTTP serveru v aplikaci (přetáčení funguje).
-- Jen když je potřeba, ffmpeg video **bez překódování obrazu** přebalí (do `%TEMP%\File2TV`):
-  vybraný zvuk a titulky dá první a jako výchozí, zvuk DTS/TrueHD/Opus převede na AC3/AAC, Dolby Atmos v eAC3 nechává,
-  titulky ležící vedle videa (`Film.srt`, `Film.cs.srt`, kódování CP1250 i UTF-8) vloží.
-  Další video ve frontě se připravuje už během přehrávání předchozího.
-- Dolby Vision (profil 5 a 8) se před odesláním přes DLNA přebalí do MP4 se záznamem DV
-  (dvcC, značka hvc1) – z MKV a TS televize Dolby Vision často nezapnou a hrají jen HDR10.
-  Titulky jsou pak uvnitř MP4 (mov_text).
-  Samsung Dolby Vision neumí: profil 8 dostane beze změny (hraje jako HDR10), u profilu 5
-  aplikace upozorní na špatné barvy.
-- V nastavení jde vypnout převod TrueHD/DTS na Dolby Digital (pro TV a přehrávače, které je umí,
-  např. Kodi – zůstane Atmos v TrueHD) a přebalení Dolby Vision do MP4. Obojí je výchozí zapnuté;
-  omezení konkrétních zařízení (Nest Hub, Samsung) platí vždy.
-- Obrázkové titulky z Blu-ray/DVD (PGS) TV přes DLNA neukáže – aplikace na to upozorní.
-- Fronta, pauza, přetáčení (i šipkami), hlasitost (pokud ji TV přes DLNA nabízí), výběr zvuku
-  a titulků, „Odeslat do → File2TV“ v Průzkumníku, ikona v oznamovací oblasti. Křížek během
-  přehrávání okno jen schová. PC během přehrávání neusne (obrazovka zhasnout smí).
+Play videos from a Windows PC on a TV in your home network (DLNA + Google Cast) – a replacement for the limited Windows "Cast to Device".
 
-Nastavení a log: `%APPDATA%\File2TV\` (`config.json`, `file2tv.log`).
+- Finds TVs that are switched on and other DLNA video players on the network (LG, Samsung, …)
+  as well as Google Cast devices (Google TV, Nvidia Shield, Chromecast, Nest Hub); audio-only players
+  (Sonos, speaker groups) are skipped. Switched-off DLNA TVs can be woken over Wake-on-LAN – only
+  if that's turned on in the settings (off by default) and the TV allows turning on over the network; not Chromecasts.
+- Google Cast: Google's player accepts only MP4/WebM, so MKV is always repacked to MP4 (the picture
+  unchanged) and subtitles go separately as WebVTT (including those embedded in the video – extracted while repacking).
+  The Shield doesn't take Dolby Vision over Chromecast (verified, plays HDR10). Chromecast doesn't report
+  what it can do, so the app has a table of known models: the Nest Hub can't do HEVC or Dolby audio (verified –
+  AC3/E-AC3 is converted to AAC stereo, for HEVC it says right away that it won't work), the 1st–3rd generation
+  "puck" plays H.264 only.
+- The video goes to the TV unchanged; the TV downloads it from a small HTTP server in the app (seeking works).
+- Only when needed, ffmpeg repacks the video **without re-encoding the picture** (into `%TEMP%\File2TV`):
+  it puts the chosen audio and subtitles first and as default, converts DTS/TrueHD/Opus audio to AC3/AAC, keeps Dolby Atmos in E-AC3,
+  and embeds subtitles lying next to the video (`Film.srt`, `Film.cs.srt`, CP1250 and UTF-8 encoding).
+  The next video in the queue is prepared while the previous one is playing.
+- Dolby Vision (profiles 5 and 8) is repacked to MP4 with the DV record (dvcC, hvc1 tag) before sending over DLNA –
+  from MKV and TS, TVs often don't turn on Dolby Vision and play only HDR10.
+  Subtitles are then inside the MP4 (mov_text).
+  Samsung doesn't support Dolby Vision: profile 8 is sent unchanged (plays as HDR10), for profile 5
+  the app warns about wrong colours.
+- In the settings you can turn off converting TrueHD/DTS to Dolby Digital (for TVs and players that support them,
+  e.g. Kodi – Atmos in TrueHD is kept) and repacking Dolby Vision to MP4. Both are on by default;
+  limits of specific devices (Nest Hub, Samsung) always apply.
+- Image-based subtitles from Blu-ray/DVD (PGS) aren't shown by TVs over DLNA – the app warns about it.
+- Queue, pause, seeking (also with arrow keys), volume (if the TV offers it over DLNA), choice of audio
+  and subtitles, "Send to → File2TV" in File Explorer, tray icon. Closing the window during
+  playback only hides it. The PC doesn't go to sleep while playing (the screen may turn off).
 
-## Jazyky
+Settings and log: `%APPDATA%\File2TV\` (`config.json`, `file2tv.log`).
 
-Aplikace mluví jazykem Windows (čeština, angličtina, slovenština, němčina, polština, francouzština,
-španělština, italština; jinak anglicky), v nastavení jde jazyk změnit. Texty jsou
-v `tvcast/locales/<kód>.json` – klíče `ui.*` pro okno, ostatní pro hlášky z Pythonu; chybějící
-text se vezme z angličtiny. Názvy jazyků zvukových stop a titulků dává prohlížeč (`Intl.DisplayNames`),
-takže nejsou potřeba v překladech. Nový jazyk = nový JSON + záznam v `i18n.LANGUAGES`.
-Překlady mimo češtinu a angličtinu jsou strojové – rodilý mluvčí je může vylepšit.
+## Languages
 
-## Vývoj
+The app speaks the Windows language (Czech, English, Slovak, German, Polish, French,
+Spanish, Italian; otherwise English); the language can be changed in the settings. Texts are
+in `tvcast/locales/<code>.json` – keys `ui.*` for the window, the rest for messages from Python; a missing
+text falls back to English. Names of audio and subtitle languages come from the browser engine (`Intl.DisplayNames`),
+so they aren't needed in the translations. A new language = a new JSON + an entry in `i18n.LANGUAGES`.
+Translations other than Czech and English are machine-made – native speakers are welcome to improve them.
+
+## Development
 
 Windows 10/11, Python 3.13:
 
@@ -52,37 +54,37 @@ python -m venv .venv
 .venv\Scripts\python main.py [video …]
 ```
 
-`get-ffmpeg.ps1` stáhne do `ffmpeg\` [BtbN ffmpeg 9.0 LGPL shared](https://github.com/BtbN/FFmpeg-Builds/releases)
-bez ffplay (~75 MB, licence v `ffmpeg\LICENSE.txt`); do Gitu nepatří. Bez něj aplikace použije ffmpeg z PATH.
+`get-ffmpeg.ps1` downloads [BtbN ffmpeg 9.0 LGPL shared](https://github.com/BtbN/FFmpeg-Builds/releases)
+without ffplay into `ffmpeg\` (~75 MB, licence in `ffmpeg\LICENSE.txt`); it doesn't belong in Git. Without it the app uses ffmpeg from PATH.
 
-## Sestavení
+## Building
 
-`.\build.ps1` → `dist\File2TV\` (~190 MB, celou složku jde zkopírovat kamkoli nebo zazipovat),
-ffmpeg ze složky `ffmpeg\` se zkopíruje vedle .exe.
+`.\build.ps1` → `dist\File2TV\` (~190 MB, the whole folder can be copied anywhere or zipped);
+ffmpeg from the `ffmpeg\` folder is copied next to the .exe.
 
-První spuštění: Windows se zeptá na firewall – povolit pro soukromou síť. Když TV video nenačte,
-nabídne aplikace tlačítko „Povolit ve firewallu“ (Windows se zeptá na oprávnění správce).
+First launch: Windows asks about the firewall – allow it for private networks. If the TV can't load the video,
+the app offers an "Allow in firewall" button (Windows asks for administrator permission).
 
-## Přenos na macOS / Linux
+## Porting to macOS / Linux
 
-Aplikace je zatím jen pro Windows a jinde nebyla vyzkoušená. Jádro je přenositelné: hledání
-a ovládání přehrávačů (DLNA, Chromecast), HTTP server, rozhodování o přebalení (ffmpeg), okno
-(pywebview má na Macu WebKit) a překlady. Přepsat je potřeba tohle:
+The app is Windows-only for now and hasn't been tried elsewhere. The core is portable: finding
+and controlling players (DLNA, Chromecast), the HTTP server, the repacking decisions (ffmpeg), the window
+(pywebview uses WebKit on a Mac) and the translations. This needs rewriting:
 
-| Místo | Teď (Windows) | Náhrada jinde |
+| Place | Now (Windows) | Replacement elsewhere |
 |---|---|---|
-| `winutil.KeepAwake` | `PowerCreateRequest` / `PowerSetRequest` | macOS: `caffeinate -i` (nebo IOKit), Linux: `systemd-inhibit` |
-| `winutil.set_sendto` | zástupce ve složce SendTo (PowerShell, WScript.Shell) | macOS: „Otevřít v aplikaci“ / Služby Finderu; Linux: `.desktop` soubor |
-| `winutil.allow_firewall` | `netsh` přes UAC | macOS se zeptá sám – tlačítko skrýt; Linux podle distribuce |
-| `winutil.mac_address` | `SendARP` (iphlpapi) | `arp -n <ip>` nebo `ip neigh` |
+| `winutil.KeepAwake` | `PowerCreateRequest` / `PowerSetRequest` | macOS: `caffeinate -i` (or IOKit), Linux: `systemd-inhibit` |
+| `winutil.set_sendto` | shortcut in the SendTo folder (PowerShell, WScript.Shell) | macOS: "Open With" / Finder Services; Linux: a `.desktop` file |
+| `winutil.allow_firewall` | `netsh` via UAC | macOS asks by itself – hide the button; Linux depends on the distribution |
+| `winutil.mac_address` | `SendARP` (iphlpapi) | `arp -n <ip>` or `ip neigh` |
 | `winutil.CONFIG`, `SENDTO` | `%APPDATA%` | `~/Library/Application Support/File2TV`, `~/.config/File2TV` |
-| `upnp.local_addresses` | adresy z `getaddrinfo(gethostname())` | na Macu často jen 127.0.0.1 – použít třeba balíček `ifaddr` |
-| `icon.tray` + `App.run` | pystray ve vlastním vlákně | na Macu musí běžet v hlavním vlákně (tam je pywebview) – ikonu v liště řešit jinak, nebo vynechat |
-| `icon.dark_mode` | registr Windows | WebView se řídí systémem sám, jen barva okna před načtením |
-| `i18n.system_language` | `GetUserDefaultUILanguage` | už má záložní `locale` |
-| `media.tool` | hledá `ffmpeg.exe` vedle aplikace, jinak PATH | bez `.exe`; na Macu stačí `brew install ffmpeg` |
-| `build.ps1`, `get-ffmpeg.ps1` | PowerShell, PyInstaller `--windowed` → `.exe` | shell skript, PyInstaller → `.app`; ffmpeg pro danou platformu |
+| `upnp.local_addresses` | addresses from `getaddrinfo(gethostname())` | on a Mac often only 127.0.0.1 – use e.g. the `ifaddr` package |
+| `icon.tray` + `App.run` | pystray in its own thread | on a Mac it must run in the main thread (where pywebview is) – handle the menu-bar icon differently, or leave it out |
+| `icon.dark_mode` | Windows registry | the WebView follows the system by itself, only the window colour before loading |
+| `i18n.system_language` | `GetUserDefaultUILanguage` | already has a `locale` fallback |
+| `media.tool` | looks for `ffmpeg.exe` next to the app, otherwise PATH | without `.exe`; on a Mac `brew install ffmpeg` is enough |
+| `build.ps1`, `get-ffmpeg.ps1` | PowerShell, PyInstaller `--windowed` → `.exe` | shell script, PyInstaller → `.app`; ffmpeg for that platform |
 
-Na Macu je pro šíření potřeba aplikaci podepsat a notarizovat (Apple Developer účet), jinak ji uživatel
-musí povolit ručně (pravé tlačítko → Otevřít). Ověřené chování konkrétních TV a přehrávačů, které by se
-při přepisu nemělo rozbít, je v `CLAUDE.md`.
+To distribute on a Mac the app has to be signed and notarized (Apple Developer account); otherwise the user
+has to allow it manually (right-click → Open). The verified behaviour of specific TVs and players, which shouldn't
+break when porting, is in `CLAUDE.md`.
