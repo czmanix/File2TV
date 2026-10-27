@@ -2,7 +2,7 @@
 
 **English** | [Čeština](README.cs.md)
 
-Play videos from a Windows PC on a TV in your home network (DLNA + Google Cast) – a replacement for the limited Windows "Cast to Device". Tries to keep best quality available (Dolby Vision, Dolby Atmos, TrueHD, ...) intact. Google Cast does not support files with Dolby Vision, plays it as HDR10.
+Play videos from a Windows PC on a TV in your home network (DLNA + Google Cast) – a replacement for the limited Windows "Cast to Device". File2TV tries to keep best quality available (Dolby Vision, Dolby Atmos, TrueHD, ...) intact. Google Cast does not support files with Dolby Vision, plays it as HDR10.
 
 - Finds TVs that are switched on and other DLNA video players on the network (LG, Samsung, …)
   as well as Google Cast devices (Google TV, Nvidia Shield, Chromecast, Nest Hub); audio-only players
