@@ -10,7 +10,7 @@ Play videos from a Windows PC on a TV in your home network (DLNA + Google Cast) 
   if that's turned on in the settings (off by default) and the TV allows turning on over the network; not Chromecasts.
 - Google Cast: Google's player accepts only MP4/WebM, so MKV is always repacked to MP4 (the picture
   unchanged) and subtitles go separately as WebVTT (including those embedded in the video – extracted while repacking).
-  The Shield doesn't take Dolby Vision over Chromecast (verified, plays HDR10). Chromecast doesn't report
+  The Shield doesn't take Dolby Vision over Google Cast (verified, plays HDR10). Google Cast doesn't report
   what it can do, so the app has a table of known models: the Nest Hub can't do HEVC or Dolby audio (verified –
   AC3/E-AC3 is converted to AAC stereo, for HEVC it says right away that it won't work), the 1st–3rd generation
   "puck" plays H.264 only.
