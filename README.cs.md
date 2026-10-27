@@ -2,7 +2,7 @@
 
 [English](README.md) | **Čeština**
 
-Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – náhrada omezeného „Vysílat do zařízení“ z Windows.
+Přehrání videa z počítače na TV v domácí síti (DLNA + Google Cast) – náhrada omezeného „Vysílat do zařízení“ z Windows. Snaží se zachovat nejvyšší dostupnou kvalitu (Dolby Vision, Dolby Atmos, TrueHD, ...). Google Cast nepodporuje Dolby Vision, přehrává ho jako HDR10.
 
 - Najde v síti zapnuté televize a další DLNA přehrávače videa (LG, Samsung, ...)
   i zařízení s Google cast (Google TV, Nvidia Shield, Chromecast, Nest Hub); vynechá zvukové přehrávače
