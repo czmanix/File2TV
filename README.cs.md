@@ -59,8 +59,15 @@ bez ffplay (~75 MB, licence v `ffmpeg\LICENSE.txt`); do Gitu nepatří. Bez něj
 
 ## Sestavení
 
-`.\build.ps1` → `dist\File2TV\` (~190 MB, celou složku jde zkopírovat kamkoli nebo zazipovat),
-ffmpeg ze složky `ffmpeg\` se zkopíruje vedle .exe.
+`.\build.ps1` → `dist\File2TV\` (~190 MB); ffmpeg ze složky `ffmpeg\` se zkopíruje vedle .exe.
+Zároveň vytvoří v `dist\` balíčky k vydání:
+
+- `File2TV-<verze>-win64.zip` – přenosná verze, stačí rozbalit kamkoli;
+- `File2TV-<verze>-setup.exe` – instalátor podle `installer.iss`, pokud je nainstalovaný
+  [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`). Instaluje jen pro
+  aktuálního uživatele (bez práv správce) do `%LOCALAPPDATA%\Programs\File2TV`, přidá položku do nabídky Start
+  a odinstalátor a volitelně vytvoří pravidlo firewallu (jeden dotaz na oprávnění správce). Verze se bere
+  z `tvcast/__init__.py`.
 
 První spuštění: Windows se zeptá na firewall – povolit pro soukromou síť. Když TV video nenačte,
 nabídne aplikace tlačítko „Povolit ve firewallu“ (Windows se zeptá na oprávnění správce).

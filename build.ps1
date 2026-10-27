@@ -22,3 +22,23 @@ if ($LASTEXITCODE) { exit $LASTEXITCODE }
 if (Test-Path ffmpeg\ffmpeg.exe) { Copy-Item ffmpeg "dist\File2TV\ffmpeg" -Recurse }
 $size = (Get-ChildItem "dist\File2TV" -Recurse | Measure-Object Length -Sum).Sum / 1MB
 Write-Host ("Hotovo: dist\File2TV\File2TV.exe ({0:N0} MB)" -f $size)
+
+# Balíčky k vydání: přenosný zip a instalátor (Inno Setup, pokud je nainstalovaný).
+$version = (& $py -c "import tvcast; print(tvcast.__version__)").Trim()
+$zip = "dist\File2TV-$version-win64.zip"
+Remove-Item $zip -ErrorAction SilentlyContinue
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[IO.Compression.ZipFile]::CreateFromDirectory("$PSScriptRoot\dist\File2TV", "$PSScriptRoot\$zip",
+    [IO.Compression.CompressionLevel]::Optimal, $true)
+Write-Host ("Hotovo: $zip ({0:N1} MB)" -f ((Get-Item $zip).Length / 1MB))
+
+$iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+          "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($iscc) {
+    & $iscc /Q "/DAppVersion=$version" "/DSourceDir=$PSScriptRoot\dist\File2TV" "/DIconFile=$ico" installer.iss
+    if ($LASTEXITCODE) { exit $LASTEXITCODE }
+    $setup = "dist\File2TV-$version-setup.exe"
+    Write-Host ("Hotovo: $setup ({0:N1} MB)" -f ((Get-Item $setup).Length / 1MB))
+} else {
+    Write-Host "Inno Setup 6 není nainstalovaný – instalátor se nevytvořil (winget install JRSoftware.InnoSetup)."
+}

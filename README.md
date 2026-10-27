@@ -59,8 +59,14 @@ without ffplay into `ffmpeg\` (~75 MB, licence in `ffmpeg\LICENSE.txt`); it does
 
 ## Building
 
-`.\build.ps1` → `dist\File2TV\` (~190 MB, the whole folder can be copied anywhere or zipped);
-ffmpeg from the `ffmpeg\` folder is copied next to the .exe.
+`.\build.ps1` → `dist\File2TV\` (~190 MB); ffmpeg from the `ffmpeg\` folder is copied next to the .exe.
+It also creates the release packages in `dist\`:
+
+- `File2TV-<version>-win64.zip` – portable, unzip anywhere;
+- `File2TV-<version>-setup.exe` – installer from `installer.iss`, if [Inno Setup 6](https://jrsoftware.org/isinfo.php)
+  is installed (`winget install JRSoftware.InnoSetup`). It installs for the current user only (no administrator
+  rights) into `%LOCALAPPDATA%\Programs\File2TV`, adds a Start menu entry and an uninstaller, and can optionally
+  create the firewall rule (one administrator prompt). The version comes from `tvcast/__init__.py`.
 
 First launch: Windows asks about the firewall – allow it for private networks. If the TV can't load the video,
 the app offers an "Allow in firewall" button (Windows asks for administrator permission).

@@ -88,7 +88,7 @@ python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 .\get-ffmpeg.ps1            # BtbN ffmpeg 9.0 LGPL shared → ffmpeg\ (not in git)
 .venv\Scripts\python main.py [video …]
-.\build.ps1                 # → dist\File2TV\File2TV.exe
+.\build.ps1                 # → dist\File2TV\File2TV.exe + dist\File2TV-<ver>-win64.zip + -setup.exe (Inno Setup, installer.iss)
 ```
 
 - Log: `%APPDATA%\File2TV\file2tv.log` (overwritten on each start). Config: `%APPDATA%\File2TV\config.json`.
