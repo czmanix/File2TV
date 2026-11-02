@@ -89,7 +89,13 @@ python -m venv .venv
 .\get-ffmpeg.ps1            # BtbN ffmpeg 9.0 LGPL shared → ffmpeg\ (not in git)
 .venv\Scripts\python main.py [video …]
 .\build.ps1                 # → dist\File2TV\File2TV.exe + dist\File2TV-<ver>-win64.zip + -setup.exe (Inno Setup, installer.iss)
+.\build-msix.ps1            # → dist\File2TV-<ver>.msix (Store identity 9MVMM63ZZ1SC, msix\AppxManifest.xml)
 ```
+
+- Inside the MSIX `winutil.packaged()` is True: the .exe path under WindowsApps changes with every version, so
+  Send To targets the execution alias; firewall rules come from the manifest; `%APPDATA%\File2TV` and SendTo are
+  excluded from write virtualization (otherwise Explorer wouldn't see the shortcut).
+- `.ps1` files are UTF-8 **with BOM** – Windows PowerShell 5.1 otherwise reads them as ANSI and the Czech text breaks parsing.
 
 - Log: `%APPDATA%\File2TV\file2tv.log` (overwritten on each start). Config: `%APPDATA%\File2TV\config.json`.
 - Send a file to the running app like Send To does: `python -c "from tvcast.app import forward_to_running; forward_to_running([r'C:\path\video.mkv'])"`.

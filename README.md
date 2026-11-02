@@ -70,6 +70,13 @@ It also creates the release packages in `dist\`:
   rights) into `%LOCALAPPDATA%\Programs\File2TV`, adds a Start menu entry and an uninstaller, and can optionally
   create the firewall rule (one administrator prompt). The version comes from `tvcast/__init__.py`.
 
+`.\build-msix.ps1` then turns `dist\File2TV\` into `dist\File2TV-<version>.msix` for the Microsoft Store (makeappx
+and makepri come from the Windows SDK BuildTools NuGet package). The package identity from Partner Center
+(Product management → Product identity) is the script's default. The package isn't signed – the Store signs it. Installing the package creates the firewall rules, Send To points
+to the alias `%LOCALAPPDATA%\Microsoft\WindowsApps\File2TV.exe` and settings stay in `%APPDATA%\File2TV`
+(manifest `msix\AppxManifest.xml`). To try it without the Store (Developer Mode on):
+`Add-AppxPackage -Register "$env:TEMP\file2tv-build\msix\AppxManifest.xml"`.
+
 First launch: Windows asks about the firewall – allow it for private networks. If the TV can't load the video,
 the app offers an "Allow in firewall" button (Windows asks for administrator permission).
 

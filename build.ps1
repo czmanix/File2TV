@@ -1,4 +1,4 @@
-# Sestaví dist\File2TV\File2TV.exe (složka, ne jeden soubor – rychlejší start).
+﻿# Sestaví dist\File2TV\File2TV.exe (složka, ne jeden soubor – rychlejší start).
 # ffmpeg.exe a ffprobe.exe (i s DLL u „shared“ buildu) přibalí ze složky ffmpeg\, když tam jsou;
 # jinak aplikace použije ffmpeg z PATH.
 $ErrorActionPreference = "Stop"

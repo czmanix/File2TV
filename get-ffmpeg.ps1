@@ -1,4 +1,4 @@
-# Stáhne ffmpeg pro přibalení k aplikaci do složky ffmpeg\ (build.ps1 ho zkopíruje vedle .exe):
+﻿# Stáhne ffmpeg pro přibalení k aplikaci do složky ffmpeg\ (build.ps1 ho zkopíruje vedle .exe):
 # BtbN ffmpeg 9.0, LGPL, „shared“ (ffmpeg.exe a ffprobe.exe sdílí DLL), bez ffplay.
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot

@@ -71,6 +71,13 @@ Zároveň vytvoří v `dist\` balíčky k vydání:
   a odinstalátor a volitelně vytvoří pravidlo firewallu (jeden dotaz na oprávnění správce). Verze se bere
   z `tvcast/__init__.py`.
 
+`.\build-msix.ps1` pak z `dist\File2TV\` udělá `dist\File2TV-<verze>.msix` pro Microsoft Store (makeappx a makepri
+si stáhne z NuGet balíčku Windows SDK BuildTools). Identita balíčku z Partner Center
+(Product management → Product identity) je ve skriptu jako výchozí. Balíček se nepodepisuje – podepíše ho Store. Pravidla firewallu vytvoří instalace balíčku, „Odeslat do“
+míří na alias `%LOCALAPPDATA%\Microsoft\WindowsApps\File2TV.exe` a nastavení zůstává v `%APPDATA%\File2TV`
+(manifest `msix\AppxManifest.xml`). Vyzkoušení bez Storu (zapnutý režim pro vývojáře):
+`Add-AppxPackage -Register "$env:TEMP\file2tv-build\msix\AppxManifest.xml"`.
+
 První spuštění: Windows se zeptá na firewall – povolit pro soukromou síť. Když TV video nenačte,
 nabídne aplikace tlačítko „Povolit ve firewallu“ (Windows se zeptá na oprávnění správce).
 
