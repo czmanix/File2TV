@@ -77,6 +77,7 @@
   "ui.emptyPick": "elige archivos",
   "ui.emptyExplorer": "en el Explorador:",
   "ui.sendToLabel": "Enviar a → File2TV",
+  "ui.openWithLabel": "Abrir con → File2TV",
   "ui.dropOverlay": "Suelta los vídeos para añadirlos a la cola",
   "ui.optLanguage": "Idioma",
   "ui.optLanguageSub": "Idioma de la aplicación",

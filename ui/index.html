@@ -223,7 +223,7 @@
   <div class="empty" id="empty">
     <svg><use href="#i-film"/></svg>
     <div class="big" data-i18n="dropHere"></div>
-    <div><span data-i18n="emptyOr"></span> <button class="link" id="emptyAdd" data-i18n="emptyPick"></button> · <span data-i18n="emptyExplorer"></span> <i data-i18n="sendToLabel"></i></div>
+    <div><span data-i18n="emptyOr"></span> <button class="link" id="emptyAdd" data-i18n="emptyPick"></button> · <span data-i18n="emptyExplorer"></span> <i id="emptyVerb" data-i18n="sendToLabel"></i></div>
   </div>
   <div id="queue"></div>
 </div>
@@ -281,6 +281,7 @@ function T(key, params) {
 function applyStrings(data) {
   L = data.strings || {};
   uiLang = data.lang || "en";
+  if (data.packaged) $("emptyVerb").dataset.i18n = "openWithLabel";  // MSIX nemá „Odeslat do“
   document.documentElement.lang = uiLang;
   languageNames = null;
   for (const e of document.querySelectorAll("[data-i18n]")) e.textContent = T(e.dataset.i18n);

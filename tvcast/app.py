@@ -260,7 +260,7 @@ class Api:
 
     def strings(self) -> dict:
         """Texty okna v jazyce aplikace (+ kód jazyka pro názvy jazyků stop přes Intl)."""
-        return {"lang": i18n.language(), "strings": i18n.ui_strings()}
+        return {"lang": i18n.language(), "strings": i18n.ui_strings(), "packaged": winutil.packaged()}
 
     def set_ui_lang(self, code: str) -> dict:
         self._app.cfg["ui_lang"] = code if code in i18n.LANGUAGES else "auto"
