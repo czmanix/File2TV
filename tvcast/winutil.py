@@ -74,17 +74,15 @@ class KeepAwake:
 
 
 def packaged() -> bool:
-    """Běží z balíčku MSIX (Microsoft Store)? Takový .exe leží ve WindowsApps a cesta se mění s každou verzí."""
+    """Běží z balíčku MSIX (Microsoft Store)? Zápisy do AppData pak jdou do soukromé kopie balíčku,
+    takže „Odeslat do“ nejde – místo něj je „Otevřít v programu“ z msix\\AppxManifest.xml."""
     length = wt.UINT(0)
     return ctypes.windll.kernel32.GetCurrentPackageFullName(ctypes.byref(length), None) != 15700  # APPMODEL_ERROR_NO_PACKAGE
 
 
 def launch_command() -> tuple[str, str]:
-    """(program, argumenty) pro spuštění aplikace – .exe, nebo Python se skriptem při vývoji.
-    Z balíčku MSIX přes alias (AppxManifest.xml) – .exe ve WindowsApps by se spustil bez identity balíčku."""
+    """(program, argumenty) pro spuštění aplikace – .exe, nebo Python se skriptem při vývoji."""
     if getattr(sys, "frozen", False):
-        if packaged():
-            return str(Path(os.environ["LOCALAPPDATA"]) / "Microsoft" / "WindowsApps" / f"{APP_NAME}.exe"), ""
         return sys.executable, ""
     pythonw = Path(sys.executable).with_name("pythonw.exe")
     main = Path(__file__).resolve().parent.parent / "main.py"
@@ -108,7 +106,7 @@ def set_sendto(on: bool) -> None:
     icon = sys.executable if getattr(sys, "frozen", False) else ""
     script = (f"$s=(New-Object -ComObject WScript.Shell).CreateShortcut('{SENDTO}');"
               f"$s.TargetPath='{exe}';$s.Arguments='{args}';"
-              f"$s.WorkingDirectory='{Path(sys.executable).parent if packaged() else Path(exe).parent}';"
+              f"$s.WorkingDirectory='{Path(exe).parent}';"
               + (f"$s.IconLocation='{icon},0';" if icon else "") + "$s.Save()")
     r = _ps(script)
     if r.returncode:

@@ -47,8 +47,10 @@ for s in (16, 24, 32, 48, 256):
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
 $version = (& $py -c "import tvcast; print(tvcast.__version__)").Trim()
+# „Otevřít v programu“ pro stejné přípony, jaké nabízí dialog pro výběr videí.
+$fileTypes = (& $py -c "from tvcast.media import VIDEO_SUFFIXES as s; print('\n'.join(f'              <uap:FileType>{x}</uap:FileType>' for x in sorted(s)))") -join "`r`n"
 (Get-Content msix\AppxManifest.xml -Raw -Encoding UTF8).
-    Replace("{IdentityName}", $IdentityName).Replace("{Publisher}", [Security.SecurityElement]::Escape($Publisher)).
+    Replace("{FileTypes}", $fileTypes).Replace("{IdentityName}", $IdentityName).Replace("{Publisher}", [Security.SecurityElement]::Escape($Publisher)).
     Replace("{PublisherDisplayName}", [Security.SecurityElement]::Escape($PublisherDisplayName)).
     Replace("{Version}", "$version.0") | Set-Content "$layout\AppxManifest.xml" -Encoding UTF8
 

@@ -251,7 +251,7 @@ class Api:
         return fn(*args)
 
     def settings(self) -> dict:
-        return {"sendto": winutil.sendto_installed(), "langs": ", ".join(i18n.preferred_langs(self._app.cfg)),
+        return {"sendto": winutil.sendto_installed(), "sendtoAvailable": not winutil.packaged(), "langs": ", ".join(i18n.preferred_langs(self._app.cfg)),
                 "langsDefault": ", ".join(i18n.default_langs()), "wol": bool(self._app.cfg.get("wake_on_lan")),
                 "convertHdAudio": self._app.cfg.get("convert_hd_audio", True),
                 "dvToMp4": self._app.cfg.get("dv_to_mp4", True),
@@ -318,7 +318,7 @@ def main() -> None:
         *([logging.StreamHandler()] if sys.stderr else [])])
     cfg = winutil.load_config()
     i18n.set_language(i18n.resolve(cfg.get("ui_lang")))
-    if frozen and (not cfg.get("sendto_offered") or winutil.sendto_installed() or had_old_sendto):
+    if frozen and not winutil.packaged() and (not cfg.get("sendto_offered") or winutil.sendto_installed() or had_old_sendto):
         # Při prvním spuštění přidá „Odeslat do → File2TV“ (v nastavení jde vypnout),
         # později jen opraví cestu, kdyby se program přesunul (nebo přejmenoval).
         def sendto() -> None:

@@ -4,11 +4,9 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
-  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
-  IgnorableNamespaces="uap uap3 desktop desktop2 rescap virtualization">
+  IgnorableNamespaces="uap uap3 desktop2 rescap">
 
   <Identity Name="{IdentityName}" Publisher="{Publisher}" Version="{Version}" ProcessorArchitecture="x64" />
 
@@ -16,14 +14,6 @@
     <DisplayName>File2TV</DisplayName>
     <PublisherDisplayName>{PublisherDisplayName}</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-    <!-- Nastavení, log a „Odeslat do“ na skutečném místě, ne v soukromé kopii balíčku:
-         zástupce musí vidět Průzkumník a nastavení zůstane společné s verzí z instalátoru. -->
-    <virtualization:FileSystemWriteVirtualization>
-      <virtualization:ExcludedDirectories>
-        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\File2TV</virtualization:ExcludedDirectory>
-        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\Microsoft\Windows\SendTo</virtualization:ExcludedDirectory>
-      </virtualization:ExcludedDirectories>
-    </virtualization:FileSystemWriteVirtualization>
   </Properties>
 
   <Dependencies>
@@ -43,7 +33,6 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
-    <rescap:Capability Name="unvirtualizedResources" />
   </Capabilities>
 
   <Applications>
@@ -52,11 +41,15 @@
         BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png" />
       <Extensions>
-        <!-- %LOCALAPPDATA%\Microsoft\WindowsApps\File2TV.exe – cíl zástupce „Odeslat do“ (winutil.launch_command). -->
-        <uap3:Extension Category="windows.appExecutionAlias" Executable="File2TV.exe" EntryPoint="Windows.FullTrustApplication">
-          <uap3:AppExecutionAlias>
-            <desktop:ExecutionAlias Alias="File2TV.exe" />
-          </uap3:AppExecutionAlias>
+        <!-- „Otevřít v programu → File2TV“ v Průzkumníku (místo „Odeslat do“, které z balíčku nejde:
+             zástupce by skončil v soukromé kopii AppData). Player = všechny vybrané soubory v jednom spuštění. -->
+        <uap3:Extension Category="windows.fileTypeAssociation">
+          <uap3:FileTypeAssociation Name="video" MultiSelectModel="Player">
+            <uap:DisplayName>File2TV</uap:DisplayName>
+            <uap:SupportedFileTypes>
+{FileTypes}
+            </uap:SupportedFileTypes>
+          </uap3:FileTypeAssociation>
         </uap3:Extension>
       </Extensions>
     </Application>

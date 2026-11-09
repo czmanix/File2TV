@@ -236,7 +236,7 @@
       <div class="txt"><span data-i18n="optLanguage"></span><div class="sub" data-i18n="optLanguageSub"></div></div>
       <select id="uiLang"></select>
     </div>
-    <div class="opt">
+    <div class="opt" id="sendtoOpt">
       <div class="txt"><span data-i18n="sendToLabel"></span><div class="sub" data-i18n="optSendToSub"></div></div>
       <button class="toggle" id="sendto"></button>
     </div>
@@ -584,6 +584,7 @@ function applySettings(s) {
   if (!s) return;
   if (s.error) alert(s.error);
   if ("sendto" in s) $("sendto").classList.toggle("on", s.sendto);
+  if ("sendtoAvailable" in s) $("sendtoOpt").classList.toggle("hidden", !s.sendtoAvailable);  // v MSIX nejde
   if ("wol" in s) $("wol").classList.toggle("on", s.wol);
   if ("convertHdAudio" in s) $("hdAudio").classList.toggle("on", s.convertHdAudio);
   if ("dvToMp4" in s) $("dvMp4").classList.toggle("on", s.dvToMp4);

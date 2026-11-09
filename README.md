@@ -72,8 +72,8 @@ It also creates the release packages in `dist\`:
 
 `.\build-msix.ps1` then turns `dist\File2TV\` into `dist\File2TV-<version>.msix` for the Microsoft Store (makeappx
 and makepri come from the Windows SDK BuildTools NuGet package). The package identity from Partner Center
-(Product management → Product identity) is the script's default. The package isn't signed – the Store signs it. Installing the package creates the firewall rules, Send To points
-to the alias `%LOCALAPPDATA%\Microsoft\WindowsApps\File2TV.exe` and settings stay in `%APPDATA%\File2TV`
+(Product management → Product identity) is the script's default. The package isn't signed – the Store signs it. Installing the package creates the firewall rules. Instead of Send To
+(a packaged app can't write into the real SendTo folder) File Explorer offers "Open with → File2TV" for video files
 (manifest `msix\AppxManifest.xml`). To try it without the Store (Developer Mode on):
 `Add-AppxPackage -Register "$env:TEMP\file2tv-build\msix\AppxManifest.xml"`.
 

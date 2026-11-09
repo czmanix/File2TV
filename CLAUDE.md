@@ -92,9 +92,10 @@ python -m venv .venv
 .\build-msix.ps1            # → dist\File2TV-<ver>.msix (Store identity 9MVMM63ZZ1SC, msix\AppxManifest.xml)
 ```
 
-- Inside the MSIX `winutil.packaged()` is True: the .exe path under WindowsApps changes with every version, so
-  Send To targets the execution alias; firewall rules come from the manifest; `%APPDATA%\File2TV` and SendTo are
-  excluded from write virtualization (otherwise Explorer wouldn't see the shortcut).
+- Inside the MSIX `winutil.packaged()` is True: new files in AppData go to the package's private copy
+  (`%LOCALAPPDATA%\Packages\czmanix.File2TV_sha8m3w5ks37a\LocalCache\Roaming`), so Send To is hidden and not
+  created – the manifest's file type association gives "Open with → File2TV" instead (MultiSelectModel=Player).
+  Firewall rules come from the manifest. The Store **denied `unvirtualizedResources`** – don't add it back.
 - `.ps1` files are UTF-8 **with BOM** – Windows PowerShell 5.1 otherwise reads them as ANSI and the Czech text breaks parsing.
 
 - Log: `%APPDATA%\File2TV\file2tv.log` (overwritten on each start). Config: `%APPDATA%\File2TV\config.json`.

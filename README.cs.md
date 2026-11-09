@@ -73,8 +73,8 @@ Zároveň vytvoří v `dist\` balíčky k vydání:
 
 `.\build-msix.ps1` pak z `dist\File2TV\` udělá `dist\File2TV-<verze>.msix` pro Microsoft Store (makeappx a makepri
 si stáhne z NuGet balíčku Windows SDK BuildTools). Identita balíčku z Partner Center
-(Product management → Product identity) je ve skriptu jako výchozí. Balíček se nepodepisuje – podepíše ho Store. Pravidla firewallu vytvoří instalace balíčku, „Odeslat do“
-míří na alias `%LOCALAPPDATA%\Microsoft\WindowsApps\File2TV.exe` a nastavení zůstává v `%APPDATA%\File2TV`
+(Product management → Product identity) je ve skriptu jako výchozí. Balíček se nepodepisuje – podepíše ho Store. Pravidla firewallu vytvoří instalace balíčku. Místo „Odeslat do“
+(aplikace z balíčku nemůže zapisovat do skutečné složky SendTo) nabízí Průzkumník u videí „Otevřít v programu → File2TV“
 (manifest `msix\AppxManifest.xml`). Vyzkoušení bez Storu (zapnutý režim pro vývojáře):
 `Add-AppxPackage -Register "$env:TEMP\file2tv-build\msix\AppxManifest.xml"`.
 
